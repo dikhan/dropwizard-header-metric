@@ -24,7 +24,7 @@ public class DropWizardApplication extends Application<DropWizardApplicationConf
     @Override
     public void initialize(Bootstrap<DropWizardApplicationConfiguration> bootstrap) {
         MultivaluedMap<String, String> headersToMeasure = getHeadersToMeasure();
-        bootstrap.addBundle(new HeaderMetricBundle(headersToMeasure));
+        bootstrap.addBundle(new HeaderMetricBundle(headersToMeasure, bootstrap.getMetricRegistry()));
     }
 
     @Override
