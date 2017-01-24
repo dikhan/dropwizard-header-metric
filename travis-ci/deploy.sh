@@ -13,7 +13,7 @@ echo $TRAVIS_PULL_REQUEST;
 
 if [[ "$TRAVIS_COMMIT_DESCRIPTION" != *"maven-release-plugin"* ]];then
 
-    if [ "$TRAVIS_BRANCH" == "master" ] && [ "$TRAVIS_PULL_REQUEST" == "false" ];then
+    if [[ "$TRAVIS_BRANCH" == "master" ]] && [[ "$TRAVIS_PULL_REQUEST" == "false" ]];then
         git config --global user.email $GITHUB_EMAIL
         git config --global user.name $GITHUB_USERNAME
 
@@ -24,6 +24,8 @@ if [[ "$TRAVIS_COMMIT_DESCRIPTION" != *"maven-release-plugin"* ]];then
 
         mvn --batch-mode release:clean release:prepare -Dusername=$GITHUB_USERNAME -Dpassword=$GITHUB_PASSWORD
         mvn release:perform --settings travis-ci/settings.xml
+    else
+        echo "Dealing with a Pull Request...";
     fi
 
 else
