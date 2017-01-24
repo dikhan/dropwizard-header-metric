@@ -220,6 +220,26 @@
                     <target>1.8</target>
                 </configuration>
             </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.3</version>
+                <configuration>
+                    <connectionUrl>scm:git:https://github.com/dikhan/dropwizard-header-metric.git</connectionUrl>
+                    <stagingRepository>ossrh::default::https://oss.sonatype.org/content/repositories/snapshots</stagingRepository>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <useReleaseProfile>false</useReleaseProfile>
+                    <releaseProfiles>release</releaseProfiles>
+                    <goals>deploy</goals>
+                    <checkModificationExcludes>
+                        <checkModificationExclude>travis-ci/*.sh</checkModificationExclude>
+                        <checkModificationExclude>**/*.java</checkModificationExclude>
+                        <checkModificationExclude>**/*.md</checkModificationExclude>
+                        <checkModificationExclude>**/pom.xml</checkModificationExclude>
+                        <checkModificationExclude>.travis.yml</checkModificationExclude>
+                    </checkModificationExcludes>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
