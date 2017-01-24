@@ -28,17 +28,18 @@ public class HeaderMetricFilter implements ContainerRequestFilter {
     public void filter(ContainerRequestContext requestContext) throws IOException {
         final MultivaluedMap<String, String> requestContextHeaders = requestContext.getHeaders();
         for(Map.Entry<String, List<String>> headerToLookUp: headersAndValuesToLookUp.entrySet()) {
-            List<String> matchedKeyValues = requestContextHeaders.get(headerToLookUp.getKey().toLowerCase());
+            String searchedHeader = headerToLookUp.getKey().toLowerCase();
+            List<String> matchedKeyValues = requestContextHeaders.get(searchedHeader);
             if(matchedKeyValues != null) {
                 List<String> headerToLookUpValues = headerToLookUp.getValue();
                 for(String headerValueToLookUp: headerToLookUpValues) {
-                    if(matchedKeyValues.contains(headerValueToLookUp)) {
-                        Counter counter = metricRegistry.counter(HEADER_METRIC_PREFIX + "-" + headerToLookUp.getKey().toLowerCase() + "-" + headerValueToLookUp.toLowerCase());
+                    String searchedHeaderValue = headerValueToLookUp.toLowerCase();
+                    if(matchedKeyValues.contains(searchedHeaderValue)) {
+                        Counter counter = metricRegistry.counter(HEADER_METRIC_PREFIX + "-" + searchedHeader + "-" + searchedHeaderValue);
                         counter.inc();
                         break;
                     }
                 }
-                break;
             }
         }
     }

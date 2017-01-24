@@ -21,8 +21,8 @@ import io.dropwizard.testing.junit.DropwizardAppRule;
 public class IntegrationTest {
 
     private static final String CONFIG_PATH = ResourceHelpers.resourceFilePath("test-example.yml");
-    private static final String HEADER = "X-CUSTOM-HEADER";
-    private static final String HEADER_VALUE = "X-CUSTOM-HEADER-VALUE";
+    private static final String HEADER = "x-custom-header";
+    private static final String HEADER_VALUE = "x-custom-header-value";
 
     @ClassRule
     public static final DropwizardAppRule<DropWizardApplicationConfiguration> RULE = new DropwizardAppRule<>(
@@ -111,7 +111,7 @@ public class IntegrationTest {
     }
 
     private String getExpectedMetric(String header, String headerValue) {
-        return String.format("%s-%s-%s", HEADER_METRIC_PREFIX, header.toLowerCase(), headerValue.toLowerCase());
+        return String.format("%s-%s-%s", HEADER_METRIC_PREFIX, header, headerValue);
     }
 
 }

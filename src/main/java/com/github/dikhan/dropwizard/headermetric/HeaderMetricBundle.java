@@ -26,8 +26,7 @@ public class HeaderMetricBundle implements Bundle {
     private final MetricRegistry metricRegistry;
 
     public HeaderMetricBundle(MultivaluedMap<String, String> headersAndValuesToLookUp, MetricRegistry metricRegistry) {
-        this.headersAndValuesToLookUp = new MultivaluedHashMap<>();
-        this.headersAndValuesToLookUp.putAll(headersAndValuesToLookUp);
+        this.headersAndValuesToLookUp = lowerCaseHeadersAndValuesToLookUp(headersAndValuesToLookUp);
         this.metricRegistry = metricRegistry;
     }
 
@@ -43,11 +42,28 @@ public class HeaderMetricBundle implements Bundle {
             MetricRegistry metricRegistry) {
         for(Map.Entry<String, List<String>> headerToRegister: headersAndValuesToLookUp.entrySet()) {
             for(String headerValue: headerToRegister.getValue()) {
-                String header = String.format("%s-%s-%s", HEADER_METRIC_PREFIX, headerToRegister.getKey().toLowerCase(), headerValue.toLowerCase());
+                String header = String.format("%s-%s-%s", HEADER_METRIC_PREFIX, headerToRegister.getKey(), headerValue);
                 metricRegistry.register(header, new Counter());
                 log.info("New Header Metric registered -> {}", header);
             }
         }
+    }
+
+    /**
+     * This method is necessary to avoid potential issues whereby the user configures the headers to look up in
+     * upper case and the headers coming from the request are lower case
+     * @param headersAndValues map containing the headers and values to be tracked
+     * @return multivalued map containing headers and values in lower case
+     */
+    private MultivaluedMap<String, String> lowerCaseHeadersAndValuesToLookUp(MultivaluedMap<String, String> headersAndValues) {
+        MultivaluedHashMap<String, String> headersAndValuesToLookUp = new MultivaluedHashMap<>();
+        for(Map.Entry<String, List<String>> headerToRegister: headersAndValues.entrySet()) {
+            String headerKeyToLookUp = headerToRegister.getKey().toLowerCase();
+            for(String headerKeyValueToLookUp : headerToRegister.getValue()) {
+                headersAndValuesToLookUp.add(headerKeyToLookUp, headerKeyValueToLookUp.toLowerCase());
+            }
+        }
+        return headersAndValuesToLookUp;
     }
 
 }
