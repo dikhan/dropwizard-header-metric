@@ -12,8 +12,8 @@ import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 
-import com.github.dikhan.dropwizard.DropWizardApplication;
-import com.github.dikhan.dropwizard.DropWizardApplicationConfiguration;
+import com.github.dikhan.dropwizard.TraceHeadersApplication;
+import com.github.dikhan.dropwizard.TraceHeadersApplicationConfiguration;
 
 import io.dropwizard.testing.ResourceHelpers;
 import io.dropwizard.testing.junit.DropwizardAppRule;
@@ -25,8 +25,8 @@ public class IntegrationTest {
     private static final String HEADER_VALUE = "x-custom-header-value";
 
     @ClassRule
-    public static final DropwizardAppRule<DropWizardApplicationConfiguration> RULE = new DropwizardAppRule<>(
-            DropWizardApplication.class, CONFIG_PATH);
+    public static final DropwizardAppRule<TraceHeadersApplicationConfiguration> RULE = new DropwizardAppRule<>(
+            TraceHeadersApplication.class, CONFIG_PATH);
 
     private Client client;
 
@@ -96,7 +96,7 @@ public class IntegrationTest {
                 .get();
         assertThat(response.getStatus()).isEqualTo(200);
         // Even though the request contained tracked headers, since the end point called is not annotated with
-        // the HeaderMetric annotation, the counter will not get increased
+        // the TraceConfiguredHeaders annotation, the counter will not get increased
         checkMeasuredHeaderCounter(HEADER, HEADER_VALUE, 0);
     }
 

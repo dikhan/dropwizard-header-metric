@@ -7,7 +7,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.ext.Provider;
 
 import com.codahale.metrics.MetricRegistry;
-import com.github.dikhan.dropwizard.headermetric.annotations.HeaderMetric;
+import com.github.dikhan.dropwizard.headermetric.annotations.TraceConfiguredHeaders;
 import com.github.dikhan.dropwizard.headermetric.filters.HeaderMetricFilter;
 
 @Provider
@@ -22,7 +22,7 @@ public class HeaderMetricFeature implements DynamicFeature {
     }
 
     public void configure(ResourceInfo resourceInfo, FeatureContext context) {
-        if (resourceInfo.getResourceMethod().getAnnotation(HeaderMetric.class) != null) {
+        if (resourceInfo.getResourceMethod().getAnnotation(TraceConfiguredHeaders.class) != null) {
             context.register(new HeaderMetricFilter(headersAndValuesToLookUp, metricRegistry));
         }
     }

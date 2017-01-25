@@ -6,20 +6,18 @@ import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
-import com.codahale.metrics.annotation.Timed;
+import com.github.dikhan.dropwizard.headermetric.annotations.TraceConfiguredHeaders;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.dikhan.dropwizard.headermetric.annotations.HeaderMetric;
-
 @Path("/hello-world")
 @Produces(MediaType.APPLICATION_JSON)
-public class HelloWorldWithHeaderMetricsResource {
+public class HelloWorldResource {
 
-    private static final Logger log = LoggerFactory.getLogger(HelloWorldWithHeaderMetricsResource.class);
+    private static final Logger log = LoggerFactory.getLogger(HelloWorldResource.class);
 
     @GET
-    @HeaderMetric
+    @TraceConfiguredHeaders
     public String sayHelloWorld() {
         return "Hello World";
     }

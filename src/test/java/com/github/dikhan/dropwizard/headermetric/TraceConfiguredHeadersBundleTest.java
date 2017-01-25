@@ -18,7 +18,7 @@ import com.codahale.metrics.MetricRegistry;
 import io.dropwizard.jersey.setup.JerseyEnvironment;
 import io.dropwizard.setup.Environment;
 
-public class HeaderMetricBundleTest {
+public class TraceConfiguredHeadersBundleTest {
 
     @Mock
     private MetricRegistry metricRegistry;
@@ -31,7 +31,7 @@ public class HeaderMetricBundleTest {
     private static final String REQUEST_HEADER_2 = "request_header_2";
     private static final String REQUEST_HEADER_2_VALUE = "request_header_2_value";
 
-    private HeaderMetricBundle headerMetricBundle;
+    private TraceHeadersBundle traceHeadersBundle;
 
     @Before
     public void setUp() {
@@ -42,12 +42,12 @@ public class HeaderMetricBundleTest {
         MultivaluedMap<String, String> headersAndValuesToLookUp = new MultivaluedHashMap<>();
         headersAndValuesToLookUp.add(REQUEST_HEADER_1, REQUEST_HEADER_1_VALUE);
         headersAndValuesToLookUp.add(REQUEST_HEADER_2, REQUEST_HEADER_2_VALUE);
-        headerMetricBundle = new HeaderMetricBundle(headersAndValuesToLookUp, metricRegistry);
+        traceHeadersBundle = new TraceHeadersBundle(headersAndValuesToLookUp, metricRegistry);
     }
 
     @Test
     public void headerMetricsAreRegisteredCorrectly() {
-        headerMetricBundle.run(environment);
+        traceHeadersBundle.run(environment);
         ArgumentCaptor<String> metricCaptor = captureHeaderMetricRegistrations(2);
         assertThat(metricCaptor.getAllValues()).contains(HEADER_METRIC_PREFIX + "-" + REQUEST_HEADER_1 + "-" + REQUEST_HEADER_1_VALUE);
         assertThat(metricCaptor.getAllValues()).contains(HEADER_METRIC_PREFIX + "-" + REQUEST_HEADER_2 + "-" + REQUEST_HEADER_2_VALUE);
@@ -59,9 +59,9 @@ public class HeaderMetricBundleTest {
         MultivaluedMap<String, String> headersAndValuesToLookUp = new MultivaluedHashMap<>();
         headersAndValuesToLookUp.add(REQUEST_HEADER_1.toUpperCase(), REQUEST_HEADER_1_VALUE.toUpperCase());
         headersAndValuesToLookUp.add(REQUEST_HEADER_2.toUpperCase(), REQUEST_HEADER_2_VALUE.toUpperCase());
-        headerMetricBundle = new HeaderMetricBundle(headersAndValuesToLookUp, metricRegistry);
-        
-        headerMetricBundle.run(environment);
+        traceHeadersBundle = new TraceHeadersBundle(headersAndValuesToLookUp, metricRegistry);
+
+        traceHeadersBundle.run(environment);
 
         ArgumentCaptor<String> metricCaptor = captureHeaderMetricRegistrations(2);
         assertThat(metricCaptor.getAllValues()).contains(HEADER_METRIC_PREFIX + "-" + REQUEST_HEADER_1 + "-" + REQUEST_HEADER_1_VALUE);

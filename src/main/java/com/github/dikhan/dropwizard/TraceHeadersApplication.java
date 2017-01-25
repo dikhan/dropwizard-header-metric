@@ -3,17 +3,17 @@ package com.github.dikhan.dropwizard;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
-import com.github.dikhan.dropwizard.headermetric.HeaderMetricBundle;
-import com.github.dikhan.dropwizard.headermetric.resources.HelloWorldWithHeaderMetricsResource;
+import com.github.dikhan.dropwizard.headermetric.TraceHeadersBundle;
+import com.github.dikhan.dropwizard.headermetric.resources.HelloWorldResource;
 
 import io.dropwizard.Application;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
 
-public class DropWizardApplication extends Application<DropWizardApplicationConfiguration> {
+public class TraceHeadersApplication extends Application<TraceHeadersApplicationConfiguration> {
 
     public static void main(String[] args) throws Exception {
-        new DropWizardApplication().run(args);
+        new TraceHeadersApplication().run(args);
     }
 
     @Override
@@ -22,14 +22,14 @@ public class DropWizardApplication extends Application<DropWizardApplicationConf
     }
 
     @Override
-    public void initialize(Bootstrap<DropWizardApplicationConfiguration> bootstrap) {
+    public void initialize(Bootstrap<TraceHeadersApplicationConfiguration> bootstrap) {
         MultivaluedMap<String, String> headersToMeasure = getHeadersToMeasure();
-        bootstrap.addBundle(new HeaderMetricBundle(headersToMeasure, bootstrap.getMetricRegistry()));
+        bootstrap.addBundle(new TraceHeadersBundle(headersToMeasure, bootstrap.getMetricRegistry()));
     }
 
     @Override
-    public void run(DropWizardApplicationConfiguration configuration, Environment environment) throws Exception {
-        environment.jersey().register(new HelloWorldWithHeaderMetricsResource());
+    public void run(TraceHeadersApplicationConfiguration configuration, Environment environment) throws Exception {
+        environment.jersey().register(new HelloWorldResource());
     }
 
     private MultivaluedMap<String, String> getHeadersToMeasure() {

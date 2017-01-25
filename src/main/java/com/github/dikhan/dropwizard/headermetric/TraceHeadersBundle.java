@@ -18,14 +18,14 @@ import io.dropwizard.setup.Environment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class HeaderMetricBundle implements Bundle {
+public class TraceHeadersBundle implements Bundle {
 
-    private static final Logger log = LoggerFactory.getLogger(HeaderMetricBundle.class);
+    private static final Logger log = LoggerFactory.getLogger(TraceHeadersBundle.class);
 
     private final MultivaluedMap<String, String> headersAndValuesToLookUp;
     private final MetricRegistry metricRegistry;
 
-    public HeaderMetricBundle(MultivaluedMap<String, String> headersAndValuesToLookUp, MetricRegistry metricRegistry) {
+    public TraceHeadersBundle(MultivaluedMap<String, String> headersAndValuesToLookUp, MetricRegistry metricRegistry) {
         this.headersAndValuesToLookUp = lowerCaseHeadersAndValuesToLookUp(headersAndValuesToLookUp);
         this.metricRegistry = metricRegistry;
     }

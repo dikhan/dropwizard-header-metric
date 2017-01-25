@@ -17,7 +17,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 
-public class HeaderMetricFilterTest {
+public class TraceConfiguredHeadersFilterTest {
 
     @Mock
     private MetricRegistry metricRegistry;
