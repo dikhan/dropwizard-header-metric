@@ -1,24 +1,31 @@
 package com.github.dikhan.dropwizard.headermetric;
 
-import static com.github.dikhan.dropwizard.headermetric.Constants.HEADER_METRIC_PREFIX;
-
 import java.util.List;
 import java.util.Map;
 
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import com.github.dikhan.dropwizard.headermetric.features.HeaderMetricFeature;
 
-import io.dropwizard.Bundle;
+import io.dropwizard.Configuration;
+import io.dropwizard.ConfiguredBundle;
 import io.dropwizard.setup.Bootstrap;
 import io.dropwizard.setup.Environment;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-public class TraceHeadersBundle implements Bundle {
+/**
+ *  TraceHeadersBundle that provides an easy to use and hassle-free {@link io.dropwizard.ConfiguredBundle}
+ *  on top of DropWizard.
+ * @param <T> Config class that should provide implementation for {@link TraceHeadersBundleConfiguration}
+ *
+ * @author Daniel I. Khan Ramiro
+ */
+public abstract class TraceHeadersBundle<T extends Configuration> implements ConfiguredBundle<T> {
 
     private static final Logger log = LoggerFactory.getLogger(TraceHeadersBundle.class);
 
@@ -33,16 +40,21 @@ public class TraceHeadersBundle implements Bundle {
     public void initialize(Bootstrap<?> bootstrap) {
     }
 
-    public void run(Environment environment) {
-        environment.jersey().register(new HeaderMetricFeature(headersAndValuesToLookUp, metricRegistry));
-        registerMetrics(headersAndValuesToLookUp, metricRegistry);
+    public void run(T configuration, Environment environment) throws Exception {
+        TraceHeadersBundleConfiguration traceHeadersBundleConfiguration = getTraceHeadersBundleConfiguration(configuration);
+        if (traceHeadersBundleConfiguration == null) {
+            throw new IllegalStateException("You need to provide an instance of TraceHeadersBundleConfiguration");
+        }
+        TraceHeadersBundleConfigHelper traceHeadersBundleConfigHelper = new TraceHeadersBundleConfigHelper(configuration, this);
+        environment.jersey().register(new HeaderMetricFeature(traceHeadersBundleConfigHelper, headersAndValuesToLookUp, metricRegistry));
+        registerHeaderMetrics(traceHeadersBundleConfigHelper, headersAndValuesToLookUp, metricRegistry);
     }
 
-    private void registerMetrics(MultivaluedMap<String, String> headersAndValuesToLookUp,
+    private void registerHeaderMetrics(TraceHeadersBundleConfigHelper traceHeadersBundleConfigHelper, MultivaluedMap<String, String> headersAndValuesToLookUp,
             MetricRegistry metricRegistry) {
         for(Map.Entry<String, List<String>> headerToRegister: headersAndValuesToLookUp.entrySet()) {
             for(String headerValue: headerToRegister.getValue()) {
-                String header = String.format("%s-%s-%s", HEADER_METRIC_PREFIX, headerToRegister.getKey(), headerValue);
+                String header = traceHeadersBundleConfigHelper.getHeaderMetricName(headerToRegister.getKey(), headerValue);
                 metricRegistry.register(header, new Counter());
                 log.info("New Header Metric registered -> {}", header);
             }
@@ -65,5 +77,7 @@ public class TraceHeadersBundle implements Bundle {
         }
         return headersAndValuesToLookUp;
     }
+
+    protected abstract TraceHeadersBundleConfiguration getTraceHeadersBundleConfiguration(T configuration);
 
 }

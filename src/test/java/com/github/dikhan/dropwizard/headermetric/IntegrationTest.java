@@ -1,6 +1,6 @@
 package com.github.dikhan.dropwizard.headermetric;
 
-import static com.github.dikhan.dropwizard.headermetric.Constants.*;
+import static com.github.dikhan.dropwizard.headermetric.utils.TestHelper.HEADER_METRIC_PREFIX;
 import static org.assertj.core.api.Assertions.*;
 
 import javax.ws.rs.client.Client;

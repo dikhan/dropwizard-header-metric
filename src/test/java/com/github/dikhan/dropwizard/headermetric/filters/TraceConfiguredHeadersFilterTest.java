@@ -1,7 +1,7 @@
 package com.github.dikhan.dropwizard.headermetric.filters;
 
-import static com.github.dikhan.dropwizard.headermetric.Constants.HEADER_METRIC_PREFIX;
-import static org.assertj.core.api.Assertions.assertThat;
+import static com.github.dikhan.dropwizard.headermetric.utils.TestHelper.*;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.io.IOException;
@@ -10,12 +10,14 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
-import com.codahale.metrics.Counter;
-import com.codahale.metrics.MetricRegistry;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+
+import com.codahale.metrics.Counter;
+import com.codahale.metrics.MetricRegistry;
+import com.github.dikhan.dropwizard.headermetric.TraceHeadersBundleConfigHelper;
 
 public class TraceConfiguredHeadersFilterTest {
 
@@ -36,7 +38,6 @@ public class TraceConfiguredHeadersFilterTest {
     public void setUp() {
         metricRegistry = mock(MetricRegistry.class);
         requestContext = mock(ContainerRequestContext.class);
-
         initMetricRegistry();
         initRequestHeaders();
     }
@@ -46,8 +47,7 @@ public class TraceConfiguredHeadersFilterTest {
         MultivaluedMap<String, String> headersAndValuesToLookUp = new MultivaluedHashMap<>();
         headersAndValuesToLookUp.add(REQUEST_HEADER_1, REQUEST_HEADER_1_VALUE);
 
-        HeaderMetricFilter headerMetricFilter = new HeaderMetricFilter(headersAndValuesToLookUp, metricRegistry);
-        headerMetricFilter.filter(requestContext);
+        callFilter(headersAndValuesToLookUp, metricRegistry);
 
         ArgumentCaptor<String> metricCaptor = captureHeaderMetricCalls(1);
         verifyThatGivenHeaderHasBeenTracked(metricCaptor, REQUEST_HEADER_1, REQUEST_HEADER_1_VALUE, counterHeader1);
@@ -59,8 +59,7 @@ public class TraceConfiguredHeadersFilterTest {
         headersAndValuesToLookUp.add(REQUEST_HEADER_1, REQUEST_HEADER_1_VALUE);
         headersAndValuesToLookUp.add(REQUEST_HEADER_2, REQUEST_HEADER_2_VALUE);
 
-        HeaderMetricFilter headerMetricFilter = new HeaderMetricFilter(headersAndValuesToLookUp, metricRegistry);
-        headerMetricFilter.filter(requestContext);
+        callFilter(headersAndValuesToLookUp, metricRegistry);
 
         ArgumentCaptor<String> metricCaptor = captureHeaderMetricCalls(2);
         verifyThatGivenHeaderHasBeenTracked(metricCaptor, REQUEST_HEADER_1, REQUEST_HEADER_1_VALUE, counterHeader1);
@@ -71,9 +70,15 @@ public class TraceConfiguredHeadersFilterTest {
     public void testFilterWithNonTraceableHeaders() throws IOException {
         // The two headers coming from the request are not measured and therefore metric registry should not be called
         MultivaluedMap<String, String> headersAndValuesToLookUp = new MultivaluedHashMap<>();
-        HeaderMetricFilter headerMetricFilter = new HeaderMetricFilter(headersAndValuesToLookUp, metricRegistry);
-        headerMetricFilter.filter(requestContext);
+        callFilter(headersAndValuesToLookUp, metricRegistry);
         verifyZeroInteractions(metricRegistry);
+    }
+
+    private void callFilter(MultivaluedMap<String, String> headersAndValuesToLookUp, MetricRegistry metricRegistry)
+            throws IOException {
+        TraceHeadersBundleConfigHelper traceHeadersBundleConfigHelper = setUpTraceHeadersBundleConfigHelper(headersAndValuesToLookUp, metricRegistry);
+        HeaderMetricFilter headerMetricFilter = new HeaderMetricFilter(traceHeadersBundleConfigHelper, headersAndValuesToLookUp, metricRegistry);
+        headerMetricFilter.filter(requestContext);
     }
 
     private ArgumentCaptor<String> captureHeaderMetricCalls(int numExpectedMetricsCalls) {

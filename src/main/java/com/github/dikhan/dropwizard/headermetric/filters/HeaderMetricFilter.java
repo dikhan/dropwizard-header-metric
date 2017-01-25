@@ -1,7 +1,5 @@
 package com.github.dikhan.dropwizard.headermetric.filters;
 
-import static com.github.dikhan.dropwizard.headermetric.Constants.HEADER_METRIC_PREFIX;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
@@ -13,14 +11,17 @@ import javax.ws.rs.ext.Provider;
 
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
+import com.github.dikhan.dropwizard.headermetric.TraceHeadersBundleConfigHelper;
 
 @Provider
 public class HeaderMetricFilter implements ContainerRequestFilter {
 
+    private final TraceHeadersBundleConfigHelper traceHeadersBundleConfigHelper;
     private MultivaluedMap<String, String> headersAndValuesToLookUp;
     private final MetricRegistry metricRegistry;
 
-    public HeaderMetricFilter(MultivaluedMap<String, String> headersAndValuesToLookUp, MetricRegistry metricRegistry) {
+    public HeaderMetricFilter(TraceHeadersBundleConfigHelper traceHeadersBundleConfigHelper, MultivaluedMap<String, String> headersAndValuesToLookUp, MetricRegistry metricRegistry) {
+        this.traceHeadersBundleConfigHelper = traceHeadersBundleConfigHelper;
         this.headersAndValuesToLookUp = headersAndValuesToLookUp;
         this.metricRegistry = metricRegistry;
     }
@@ -35,7 +36,8 @@ public class HeaderMetricFilter implements ContainerRequestFilter {
                 for(String headerValueToLookUp: headerToLookUpValues) {
                     String searchedHeaderValue = headerValueToLookUp.toLowerCase();
                     if(matchedKeyValues.contains(searchedHeaderValue)) {
-                        Counter counter = metricRegistry.counter(HEADER_METRIC_PREFIX + "-" + searchedHeader + "-" + searchedHeaderValue);
+                        String metricName = traceHeadersBundleConfigHelper.getHeaderMetricName(searchedHeader, searchedHeaderValue);
+                        Counter counter = metricRegistry.counter(metricName);
                         counter.inc();
                         break;
                     }

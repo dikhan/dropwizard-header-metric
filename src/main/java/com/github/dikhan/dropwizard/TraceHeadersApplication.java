@@ -4,6 +4,7 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
 import com.github.dikhan.dropwizard.headermetric.TraceHeadersBundle;
+import com.github.dikhan.dropwizard.headermetric.TraceHeadersBundleConfiguration;
 import com.github.dikhan.dropwizard.headermetric.resources.HelloWorldResource;
 
 import io.dropwizard.Application;
@@ -24,7 +25,12 @@ public class TraceHeadersApplication extends Application<TraceHeadersApplication
     @Override
     public void initialize(Bootstrap<TraceHeadersApplicationConfiguration> bootstrap) {
         MultivaluedMap<String, String> headersToMeasure = getHeadersToMeasure();
-        bootstrap.addBundle(new TraceHeadersBundle(headersToMeasure, bootstrap.getMetricRegistry()));
+        bootstrap.addBundle(new TraceHeadersBundle<TraceHeadersApplicationConfiguration>(headersToMeasure, bootstrap.getMetricRegistry()) {
+            @Override
+            protected TraceHeadersBundleConfiguration getTraceHeadersBundleConfiguration(TraceHeadersApplicationConfiguration configuration) {
+                return configuration.getTraceHeadersBundleConfiguration();
+            }
+        });
     }
 
     @Override
