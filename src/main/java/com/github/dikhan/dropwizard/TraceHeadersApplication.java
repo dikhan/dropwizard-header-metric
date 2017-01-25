@@ -38,6 +38,13 @@ public class TraceHeadersApplication extends Application<TraceHeadersApplication
         environment.jersey().register(new HelloWorldResource());
     }
 
+    /**
+     * This method serves as an example on how to pre-populate the map that will be used in the bundle
+     * to register all the headers as metrics to be able to monitor them and report them should the user
+     * has specified any reporter in the metrics configuration in the yml file.
+     * These can even be injected by a DI framework such as GoogleGuice
+     * @return map containing the headers to look up when receiving a new request
+     */
     private MultivaluedMap<String, String> getHeadersToMeasure() {
         MultivaluedMap<String, String> headers = new MultivaluedHashMap<>();
         headers.add("X-CUSTOM-HEADER", "X-CUSTOM-HEADER-VALUE");
