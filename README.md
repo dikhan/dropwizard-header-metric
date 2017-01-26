@@ -60,10 +60,20 @@ public class YourApplicationConfiguration extends Configuration {
 
 - Add the following your configuration yml:
 
+Both properties (headersToTraceJson and metricPrefix)are optional and can be left empty, though the empty String "" needs 
+to be set.
+The headersToTraceJson property value has to be properly formatter as Json object and the double quotes need to be escaped. 
+The following structures are supported:
+0. Empty Json object: No headers will be tracked in this case
+1. Single key value: {"y-custom-header": "y-custom-header-value1"}
+2. Key with multiple values: {"x-custom-header": ["x-custom-header-value1", "x-custom-header-value2"]}
+
 ```
 traceHeaders:
+  headersToTraceJson: "{\"x-custom-header\": [\"x-custom-header-value1\", \"x-custom-header-value2\"], \"y-custom-header\": \"y-custom-header-value1\"}"    
   metricPrefix: HeaderMetricPrefix
 ```
+
 
 - In your Application class:
 

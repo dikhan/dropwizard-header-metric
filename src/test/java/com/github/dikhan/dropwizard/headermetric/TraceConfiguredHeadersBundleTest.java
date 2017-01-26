@@ -4,9 +4,6 @@ import static com.github.dikhan.dropwizard.headermetric.utils.TestHelper.*;
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -28,7 +25,8 @@ public class TraceConfiguredHeadersBundleTest {
     private Environment environment;
 
     private static final String REQUEST_HEADER_1 = "request_header_1";
-    private static final String REQUEST_HEADER_1_VALUE = "request_header_1_value";
+    private static final String REQUEST_HEADER_1_VALUE = "request_header_1_value_1";
+    private static final String REQUEST_HEADER_1_VALUE_2 = "request_header_1_value_2";
     private static final String REQUEST_HEADER_2 = "request_header_2";
     private static final String REQUEST_HEADER_2_VALUE = "request_header_2_value";
 
@@ -38,40 +36,48 @@ public class TraceConfiguredHeadersBundleTest {
     @Before
     public void setUp() {
         setUpMocks();
-        MultivaluedMap<String, String> headersAndValuesToLookUp = setUpHeadersAndValuesToLookUp();
-        traceHeadersApplicationConfiguration = setUpTraceHeadersApplicationConfiguration(HEADER_METRIC_PREFIX);
-        traceHeadersBundle = setUpTraceHeadersBundle(headersAndValuesToLookUp, metricRegistry);
+        traceHeadersApplicationConfiguration = setUpTraceHeadersApplicationConfiguration(HEADER_METRIC_PREFIX,
+                HEADERS_TO_TRACE_JSON);
+        traceHeadersBundle = setUpTraceHeadersBundle(metricRegistry);
     }
 
     @Test
     public void headerMetricsAreRegisteredCorrectly() throws Exception {
         traceHeadersBundle.run(traceHeadersApplicationConfiguration, environment);
-        ArgumentCaptor<String> metricCaptor = captureHeaderMetricRegistrations(2);
-        assertThat(metricCaptor.getAllValues()).contains(HEADER_METRIC_PREFIX + "-" + REQUEST_HEADER_1 + "-" + REQUEST_HEADER_1_VALUE);
-        assertThat(metricCaptor.getAllValues()).contains(HEADER_METRIC_PREFIX + "-" + REQUEST_HEADER_2 + "-" + REQUEST_HEADER_2_VALUE);
+        ArgumentCaptor<String> metricCaptor = captureHeaderMetricRegistrations(3);
+        assertThat(metricCaptor.getAllValues()).contains(
+                HEADER_METRIC_PREFIX + "-" + REQUEST_HEADER_1 + "-" + REQUEST_HEADER_1_VALUE);
+        assertThat(metricCaptor.getAllValues()).contains(
+                HEADER_METRIC_PREFIX + "-" + REQUEST_HEADER_1 + "-" + REQUEST_HEADER_1_VALUE_2);
+        assertThat(metricCaptor.getAllValues()).contains(
+                HEADER_METRIC_PREFIX + "-" + REQUEST_HEADER_2 + "-" + REQUEST_HEADER_2_VALUE);
     }
 
     @Test
     public void handleHeadersAndValuesToLookUpInUpperCase() throws Exception {
-
-        MultivaluedMap<String, String> headersAndValuesToLookUp = new MultivaluedHashMap<>();
-        headersAndValuesToLookUp.add(REQUEST_HEADER_1.toUpperCase(), REQUEST_HEADER_1_VALUE.toUpperCase());
-        headersAndValuesToLookUp.add(REQUEST_HEADER_2.toUpperCase(), REQUEST_HEADER_2_VALUE.toUpperCase());
-        traceHeadersBundle = setUpTraceHeadersBundle(headersAndValuesToLookUp, metricRegistry);
+        String headersToTraceJson = String.format("{\"%s\": \"%s\", \"%s\": \"%s\"}", REQUEST_HEADER_1.toUpperCase(),
+                REQUEST_HEADER_1_VALUE.toUpperCase(), REQUEST_HEADER_2.toUpperCase(),
+                REQUEST_HEADER_2_VALUE.toUpperCase());
+        traceHeadersApplicationConfiguration = setUpTraceHeadersApplicationConfiguration(HEADER_METRIC_PREFIX,
+                headersToTraceJson);
+        traceHeadersBundle = setUpTraceHeadersBundle(metricRegistry);
 
         traceHeadersBundle.run(traceHeadersApplicationConfiguration, environment);
 
         ArgumentCaptor<String> metricCaptor = captureHeaderMetricRegistrations(2);
-        assertThat(metricCaptor.getAllValues()).contains(HEADER_METRIC_PREFIX + "-" + REQUEST_HEADER_1 + "-" + REQUEST_HEADER_1_VALUE);
-        assertThat(metricCaptor.getAllValues()).contains(HEADER_METRIC_PREFIX + "-" + REQUEST_HEADER_2 + "-" + REQUEST_HEADER_2_VALUE);
+        assertThat(metricCaptor.getAllValues()).contains(
+                HEADER_METRIC_PREFIX + "-" + REQUEST_HEADER_1 + "-" + REQUEST_HEADER_1_VALUE);
+        assertThat(metricCaptor.getAllValues()).contains(
+                HEADER_METRIC_PREFIX + "-" + REQUEST_HEADER_2 + "-" + REQUEST_HEADER_2_VALUE);
     }
 
     @Test
     public void headerMetricsAreRegisteredCorrectlyWithNoPrefix() throws Exception {
-        traceHeadersApplicationConfiguration = setUpTraceHeadersApplicationConfiguration("");
+        traceHeadersApplicationConfiguration = setUpTraceHeadersApplicationConfiguration("", HEADERS_TO_TRACE_JSON);
         traceHeadersBundle.run(traceHeadersApplicationConfiguration, environment);
-        ArgumentCaptor<String> metricCaptor = captureHeaderMetricRegistrations(2);
+        ArgumentCaptor<String> metricCaptor = captureHeaderMetricRegistrations(3);
         assertThat(metricCaptor.getAllValues()).contains(REQUEST_HEADER_1 + "-" + REQUEST_HEADER_1_VALUE);
+        assertThat(metricCaptor.getAllValues()).contains(REQUEST_HEADER_1 + "-" + REQUEST_HEADER_1_VALUE_2);
         assertThat(metricCaptor.getAllValues()).contains(REQUEST_HEADER_2 + "-" + REQUEST_HEADER_2_VALUE);
     }
 
@@ -79,13 +85,6 @@ public class TraceConfiguredHeadersBundleTest {
         metricRegistry = mock(MetricRegistry.class);
         environment = mock(Environment.class);
         when(environment.jersey()).thenReturn(mock(JerseyEnvironment.class));
-    }
-
-    private MultivaluedMap<String, String> setUpHeadersAndValuesToLookUp() {
-        MultivaluedMap<String, String> headersAndValuesToLookUp = new MultivaluedHashMap<>();
-        headersAndValuesToLookUp.add(REQUEST_HEADER_1, REQUEST_HEADER_1_VALUE);
-        headersAndValuesToLookUp.add(REQUEST_HEADER_2, REQUEST_HEADER_2_VALUE);
-        return headersAndValuesToLookUp;
     }
 
     private ArgumentCaptor<String> captureHeaderMetricRegistrations(int numExpectedMetricsCalls) {

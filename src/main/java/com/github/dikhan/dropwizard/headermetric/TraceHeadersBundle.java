@@ -1,9 +1,5 @@
 package com.github.dikhan.dropwizard.headermetric;
 
-import java.util.List;
-import java.util.Map;
-
-import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
 import org.slf4j.Logger;
@@ -29,11 +25,9 @@ public abstract class TraceHeadersBundle<T extends Configuration> implements Con
 
     private static final Logger log = LoggerFactory.getLogger(TraceHeadersBundle.class);
 
-    private final MultivaluedMap<String, String> headersAndValuesToLookUp;
     private final MetricRegistry metricRegistry;
 
-    public TraceHeadersBundle(MultivaluedMap<String, String> headersAndValuesToLookUp, MetricRegistry metricRegistry) {
-        this.headersAndValuesToLookUp = lowerCaseHeadersAndValuesToLookUp(headersAndValuesToLookUp);
+    public TraceHeadersBundle(MetricRegistry metricRegistry) {
         this.metricRegistry = metricRegistry;
     }
 
@@ -45,37 +39,23 @@ public abstract class TraceHeadersBundle<T extends Configuration> implements Con
         if (traceHeadersBundleConfiguration == null) {
             throw new IllegalStateException("You need to provide an instance of TraceHeadersBundleConfiguration");
         }
-        TraceHeadersBundleConfigHelper traceHeadersBundleConfigHelper = new TraceHeadersBundleConfigHelper(configuration, this);
-        environment.jersey().register(new HeaderMetricFeature(traceHeadersBundleConfigHelper, headersAndValuesToLookUp, metricRegistry));
-        registerHeaderMetrics(traceHeadersBundleConfigHelper, headersAndValuesToLookUp, metricRegistry);
+        TraceHeadersBundleConfigHelper<T> traceHeadersBundleConfigHelper = new TraceHeadersBundleConfigHelper<>(configuration, this);
+        traceHeadersBundleConfigHelper.getMultivaluedMapFromHeadersToTraceJson();
+        environment.jersey().register(new HeaderMetricFeature(traceHeadersBundleConfigHelper, metricRegistry));
+        registerHeaderMetrics(traceHeadersBundleConfigHelper, metricRegistry);
     }
 
-    private void registerHeaderMetrics(TraceHeadersBundleConfigHelper traceHeadersBundleConfigHelper, MultivaluedMap<String, String> headersAndValuesToLookUp,
+    private void registerHeaderMetrics(TraceHeadersBundleConfigHelper<T> traceHeadersBundleConfigHelper,
             MetricRegistry metricRegistry) {
-        for(Map.Entry<String, List<String>> headerToRegister: headersAndValuesToLookUp.entrySet()) {
-            for(String headerValue: headerToRegister.getValue()) {
-                String header = traceHeadersBundleConfigHelper.getHeaderMetricName(headerToRegister.getKey(), headerValue);
+        MultivaluedMap<String, String> headersAndValuesToLookUp = traceHeadersBundleConfigHelper.getMultivaluedMapFromHeadersToTraceJson();
+        headersAndValuesToLookUp.entrySet().forEach(headerToRegister -> {
+            for (String headerValue : headerToRegister.getValue()) {
+                String header = traceHeadersBundleConfigHelper
+                        .getHeaderMetricName(headerToRegister.getKey(), headerValue);
                 metricRegistry.register(header, new Counter());
                 log.info("New Header Metric registered -> {}", header);
             }
-        }
-    }
-
-    /**
-     * This method is necessary to avoid potential issues whereby the user configures the headers to look up in
-     * upper case and the headers coming from the request are lower case
-     * @param headersAndValues map containing the headers and values to be tracked
-     * @return multivalued map containing headers and values in lower case
-     */
-    private MultivaluedMap<String, String> lowerCaseHeadersAndValuesToLookUp(MultivaluedMap<String, String> headersAndValues) {
-        MultivaluedHashMap<String, String> headersAndValuesToLookUp = new MultivaluedHashMap<>();
-        for(Map.Entry<String, List<String>> headerToRegister: headersAndValues.entrySet()) {
-            String headerKeyToLookUp = headerToRegister.getKey().toLowerCase();
-            for(String headerKeyValueToLookUp : headerToRegister.getValue()) {
-                headersAndValuesToLookUp.add(headerKeyToLookUp, headerKeyValueToLookUp.toLowerCase());
-            }
-        }
-        return headersAndValuesToLookUp;
+        });
     }
 
     protected abstract TraceHeadersBundleConfiguration getTraceHeadersBundleConfiguration(T configuration);

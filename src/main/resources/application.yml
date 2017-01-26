@@ -16,4 +16,5 @@ metrics:
       rateUnit: seconds
 
 traceHeaders:
+  headersToTraceJson: "{\"x-custom-header\": [\"x-custom-header-value1\", \"x-custom-header-value2\"], \"y-custom-header\": \"y-custom-header-value1\"}"
   metricPrefix: HeaderMetric

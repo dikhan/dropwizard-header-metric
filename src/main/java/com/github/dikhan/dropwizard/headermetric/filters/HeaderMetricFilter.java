@@ -17,29 +17,32 @@ import com.github.dikhan.dropwizard.headermetric.TraceHeadersBundleConfigHelper;
 public class HeaderMetricFilter implements ContainerRequestFilter {
 
     private final TraceHeadersBundleConfigHelper traceHeadersBundleConfigHelper;
-    private MultivaluedMap<String, String> headersAndValuesToLookUp;
     private final MetricRegistry metricRegistry;
 
-    public HeaderMetricFilter(TraceHeadersBundleConfigHelper traceHeadersBundleConfigHelper, MultivaluedMap<String, String> headersAndValuesToLookUp, MetricRegistry metricRegistry) {
+    public HeaderMetricFilter(TraceHeadersBundleConfigHelper traceHeadersBundleConfigHelper, MetricRegistry metricRegistry) {
         this.traceHeadersBundleConfigHelper = traceHeadersBundleConfigHelper;
-        this.headersAndValuesToLookUp = headersAndValuesToLookUp;
         this.metricRegistry = metricRegistry;
     }
 
     public void filter(ContainerRequestContext requestContext) throws IOException {
+        MultivaluedMap<String, String> headersAndValuesToLookUp = traceHeadersBundleConfigHelper.getMultivaluedMapFromHeadersToTraceJson();
         final MultivaluedMap<String, String> requestContextHeaders = requestContext.getHeaders();
         for(Map.Entry<String, List<String>> headerToLookUp: headersAndValuesToLookUp.entrySet()) {
-            String searchedHeader = headerToLookUp.getKey().toLowerCase();
+            String searchedHeader = headerToLookUp.getKey();
             List<String> matchedKeyValues = requestContextHeaders.get(searchedHeader);
             if(matchedKeyValues != null) {
                 List<String> headerToLookUpValues = headerToLookUp.getValue();
-                for(String headerValueToLookUp: headerToLookUpValues) {
-                    String searchedHeaderValue = headerValueToLookUp.toLowerCase();
-                    if(matchedKeyValues.contains(searchedHeaderValue)) {
-                        String metricName = traceHeadersBundleConfigHelper.getHeaderMetricName(searchedHeader, searchedHeaderValue);
+                for(String searchedValue: headerToLookUpValues) {
+                    // When a request contains multiple values for a given header, the multivalued map does not
+                    // include multiple indexes for the different values; rather the values are all stored in the first
+                    // index concatenated. E,g: x-custom-header-value-1,x-custom-header-value-2. Hence the need to
+                    // look up the first index and search for matches, this is a special case that needs to be covered.
+                    if(matchedKeyValues.get(0).contains(searchedValue) || matchedKeyValues.contains(
+                            searchedValue)) {
+                        String metricName = traceHeadersBundleConfigHelper.getHeaderMetricName(searchedHeader,
+                                searchedValue);
                         Counter counter = metricRegistry.counter(metricName);
                         counter.inc();
-                        break;
                     }
                 }
             }
