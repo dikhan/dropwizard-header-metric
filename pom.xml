@@ -3,7 +3,7 @@
 
     <groupId>com.github.dikhan</groupId>
     <artifactId>dropwizard-header-metric</artifactId>
-    <version>1.2-SNAPSHOT</version>
+    <version>1.2</version>
     <packaging>jar</packaging>
 
     <name>dropwizard-header-metric</name>
@@ -37,7 +37,7 @@
         <connection>scm:git:https://github.com/dikhan/dropwizard-header-metric.git</connection>
         <developerConnection>scm:git:https://github.com/dikhan/dropwizard-header-metric.git</developerConnection>
         <url>https://github.com/dikhan/dropwizard-header-metric.git</url>
-      <tag>HEAD</tag>
+      <tag>dropwizard-header-metric-1.2</tag>
   </scm>
 
     <issueManagement>
