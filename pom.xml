@@ -3,7 +3,7 @@
 
     <groupId>com.github.dikhan</groupId>
     <artifactId>dropwizard-header-metric</artifactId>
-    <version>1.4-SNAPSHOT</version>
+    <version>1.0.4-SNAPSHOT</version>
     <packaging>jar</packaging>
 
     <name>dropwizard-header-metric</name>
