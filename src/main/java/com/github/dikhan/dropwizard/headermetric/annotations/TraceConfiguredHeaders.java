@@ -6,16 +6,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * An annotation for marking a method of an annotated object as TraceConfiguredHeaders.
- * <p/>
+ * <p>An annotation for marking a method of an annotated object as TraceConfiguredHeaders.</p>
  * Given a method like this:
- * <pre><code>
+ * <pre>
+ *     <code>
  *     {@literal @}TraceConfiguredHeaders(name = "fancyName")
  *     public String fancyName(String name) {
  *         return "Sir Captain " + name;
  *     }
- * </code></pre>
- * <p/>
+ *     </code>
+ * </pre>
+ * <p></p>
  * A counter for the defining class with the name {@code fancyName} will be created for each of the
  * headers configured in the yml file. And each time the method {@code #fancyName(String)} with such annotation in
  * place is invoked, the method's execution will be counted should any of the headers in the request match the
