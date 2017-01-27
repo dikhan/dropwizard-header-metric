@@ -33,11 +33,14 @@ and start tracking all the headers you wish!
 
 ```
     @GET
-    @TraceConfiguredHeaders
+    @TraceConfiguredHeaders(name="sayHelloWorld")
     public String sayHelloWorld() {
         return "Hello World";
     }
 ```
+
+The annotation supports the configuration of a name. This value will be used to register the metrics and be able to
+identify what exact endpoint got the expected headers.
 
 - Add the following to your Configuration class:
 
