@@ -8,7 +8,7 @@
 
     <name>dropwizard-header-metric</name>
     <description>Create metrics and send it to the preferable reporter if request header matches any of the headers
-        configured to be measured
+        configured to be measured.
     </description>
     <url>https://github.com/dikhan/dropwizard-header-metric</url>
     <inceptionYear>2017</inceptionYear>
