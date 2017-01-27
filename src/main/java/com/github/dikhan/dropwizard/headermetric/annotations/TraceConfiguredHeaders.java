@@ -37,6 +37,6 @@ public @interface TraceConfiguredHeaders {
     /**
      * @return The name of the end point where headers need to be tracked.
      */
-    String name() default "";
+    String name();
 
 }
