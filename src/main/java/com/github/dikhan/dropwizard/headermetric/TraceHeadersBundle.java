@@ -1,11 +1,8 @@
 package com.github.dikhan.dropwizard.headermetric;
 
-import javax.ws.rs.core.MultivaluedMap;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import com.github.dikhan.dropwizard.headermetric.features.HeaderMetricFeature;
 
@@ -40,22 +37,7 @@ public abstract class TraceHeadersBundle<T extends Configuration> implements Con
             throw new IllegalStateException("You need to provide an instance of TraceHeadersBundleConfiguration");
         }
         TraceHeadersBundleConfigHelper<T> traceHeadersBundleConfigHelper = new TraceHeadersBundleConfigHelper<>(configuration, this);
-        traceHeadersBundleConfigHelper.getMultivaluedMapFromHeadersToTraceJson();
         environment.jersey().register(new HeaderMetricFeature(traceHeadersBundleConfigHelper, metricRegistry));
-        registerHeaderMetrics(traceHeadersBundleConfigHelper, metricRegistry);
-    }
-
-    private void registerHeaderMetrics(TraceHeadersBundleConfigHelper<T> traceHeadersBundleConfigHelper,
-            MetricRegistry metricRegistry) {
-        MultivaluedMap<String, String> headersAndValuesToLookUp = traceHeadersBundleConfigHelper.getMultivaluedMapFromHeadersToTraceJson();
-        headersAndValuesToLookUp.entrySet().forEach(headerToRegister -> {
-            for (String headerValue : headerToRegister.getValue()) {
-                String header = traceHeadersBundleConfigHelper
-                        .getHeaderMetricName(headerToRegister.getKey(), headerValue);
-                metricRegistry.register(header, new Counter());
-                log.info("New Header Metric registered -> {}", header);
-            }
-        });
     }
 
     protected abstract TraceHeadersBundleConfiguration getTraceHeadersBundleConfiguration(T configuration);

@@ -8,6 +8,8 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
 
 import com.codahale.metrics.Counter;
+import com.github.dikhan.dropwizard.headermetric.annotations.TraceConfiguredHeaders;
+import com.github.dikhan.dropwizard.headermetric.resources.TestResource;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
@@ -56,8 +58,7 @@ public class IntegrationTest {
 
     @Test
     public void requestWithNoHeadersCallsTraceConfiguredHeadersAnnotatedEndPoint() throws Exception {
-        final Response response = client.target("http://localhost:" + RULE.getLocalPort() + "/hello-world")
-                .request()
+        final Response response = client.target("http://localhost:" + RULE.getLocalPort() + "/hello-world").request()
                 .get();
         assertThat(response.getStatus()).isEqualTo(200);
         checkMeasuredHeaderCounter(X_HEADER, X_HEADER_VALUE, 0);
@@ -65,21 +66,17 @@ public class IntegrationTest {
 
     @Test
     public void requestContainingMeasuredHeaderCallsTraceConfiguredHeadersAnnotatedEndPoint() throws Exception {
-        final Response response = client.target("http://localhost:" + RULE.getLocalPort() + "/hello-world")
-                .request()
-                .header(X_HEADER, X_HEADER_VALUE)
-                .get();
+        final Response response = client.target("http://localhost:" + RULE.getLocalPort() + "/hello-world").request()
+                .header(X_HEADER, X_HEADER_VALUE).get();
         assertThat(response.getStatus()).isEqualTo(200);
         checkMeasuredHeaderCounter(X_HEADER, X_HEADER_VALUE, 1);
     }
 
     @Test
-    public void requestContainingMeasuredHeadersWithMultipleValuesCallsTraceConfiguredHeadersAnnotatedEndPoint() throws Exception {
-        final Response response = client.target("http://localhost:" + RULE.getLocalPort() + "/hello-world")
-                .request()
-                .header(X_HEADER, X_HEADER_VALUE)
-                .header(X_HEADER, X_HEADER_VALUE_2)
-                .header(Y_HEADER, Y_HEADER_VALUE)
+    public void requestContainingMeasuredHeadersWithMultipleValuesCallsTraceConfiguredHeadersAnnotatedEndPoint()
+            throws Exception {
+        final Response response = client.target("http://localhost:" + RULE.getLocalPort() + "/hello-world").request()
+                .header(X_HEADER, X_HEADER_VALUE).header(X_HEADER, X_HEADER_VALUE_2).header(Y_HEADER, Y_HEADER_VALUE)
                 .get();
         assertThat(response.getStatus()).isEqualTo(200);
         checkMeasuredHeaderCounter(X_HEADER, X_HEADER_VALUE, 1);
@@ -89,10 +86,8 @@ public class IntegrationTest {
 
     @Test
     public void requestWithNoMeasuredHeaderCallsTraceConfiguredHeadersAnnotatedEndPoint() throws Exception {
-        final Response response = client.target("http://localhost:" + RULE.getLocalPort() + "/hello-world")
-                .request()
-                .header("NonTrackedHeader", "NonTrackedHeaderValue")
-                .get();
+        final Response response = client.target("http://localhost:" + RULE.getLocalPort() + "/hello-world").request()
+                .header("NonTrackedHeader", "NonTrackedHeaderValue").get();
         assertThat(response.getStatus()).isEqualTo(200);
         checkNonMeasuredHeaderCounter("NonTrackedHeader", "NonTrackedHeaderValue");
     }
@@ -100,8 +95,7 @@ public class IntegrationTest {
     @Test
     public void callNonTraceConfiguredHeadersAnnotatedEndPoint() throws Exception {
         final Response response = client.target("http://localhost:" + RULE.getLocalPort() + "/hello-world/dani")
-                .request()
-                .get();
+                .request().get();
         assertThat(response.getStatus()).isEqualTo(200);
         checkMeasuredHeaderCounter(X_HEADER, X_HEADER_VALUE, 0);
     }
@@ -109,9 +103,7 @@ public class IntegrationTest {
     @Test
     public void requestWithNonMeasuredHeaderCallsNonTraceConfiguredHeadersAnnotatedEndPoint() throws Exception {
         final Response response = client.target("http://localhost:" + RULE.getLocalPort() + "/hello-world/dani")
-                .request()
-                .header("NonTrackedHeader", "NonTrackedHeaderValue")
-                .get();
+                .request().header("NonTrackedHeader", "NonTrackedHeaderValue").get();
         assertThat(response.getStatus()).isEqualTo(200);
         checkNonMeasuredHeaderCounter("NonTrackedHeader", "NonTrackedHeaderValue");
     }
@@ -119,27 +111,27 @@ public class IntegrationTest {
     @Test
     public void requestWithMeasuredHeaderCallsNonHeaderMetricAnnotatedEndPoint() throws Exception {
         final Response response = client.target("http://localhost:" + RULE.getLocalPort() + "/hello-world/dani")
-                .request()
-                .header(X_HEADER, X_HEADER_VALUE)
-                .get();
+                .request().header(X_HEADER, X_HEADER_VALUE).get();
         assertThat(response.getStatus()).isEqualTo(200);
         // Even though the request contained tracked headers, since the end point called is not annotated with
         // the TraceConfiguredHeaders annotation, the counter will not get increased
         checkMeasuredHeaderCounter(X_HEADER, X_HEADER_VALUE, 0);
     }
 
-    private void checkMeasuredHeaderCounter(String header, String headerValue, int count) {
+    private void checkMeasuredHeaderCounter(String header, String headerValue, int count) throws NoSuchMethodException {
         String expectedMetric = getExpectedMetric(header, headerValue);
         assertThat(RULE.getEnvironment().metrics().getCounters().get(expectedMetric).getCount()).isEqualTo(count);
     }
 
-    private void checkNonMeasuredHeaderCounter(String header, String headerValue) {
+    private void checkNonMeasuredHeaderCounter(String header, String headerValue) throws NoSuchMethodException {
         String expectedMetric = getExpectedMetric(header, headerValue);
         assertThat(RULE.getEnvironment().metrics().getCounters().get(expectedMetric)).isNull();
     }
 
-    private String getExpectedMetric(String header, String headerValue) {
-        return String.format("%s-%s-%s", HEADER_METRIC_PREFIX, header, headerValue);
+    private String getExpectedMetric(String header, String headerValue) throws NoSuchMethodException {
+        String endPointHit = TestResource.class.getDeclaredMethod("sayHelloWorld", null)
+                .getAnnotation(TraceConfiguredHeaders.class).name();
+        return String.format("%s-%s-%s-%s", HEADER_METRIC_PREFIX, endPointHit, header, headerValue);
     }
 
 }

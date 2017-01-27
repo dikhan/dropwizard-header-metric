@@ -10,7 +10,7 @@ import com.github.dikhan.dropwizard.headermetric.annotations.TraceConfiguredHead
 
 @Path("/hello-world")
 @Produces(MediaType.APPLICATION_JSON)
-public class HelloWorldResource {
+public class TestResource {
 
     @GET
     @TraceConfiguredHeaders(name = "sayHelloWorld")

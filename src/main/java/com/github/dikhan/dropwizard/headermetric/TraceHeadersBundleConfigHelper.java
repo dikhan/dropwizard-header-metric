@@ -30,23 +30,27 @@ public class TraceHeadersBundleConfigHelper<T extends Configuration> {
         this.traceHeadersBundle = traceHeadersBundle;
     }
 
-    public String getHeaderMetricName(String header, String headerValue) {
+    public String getHeaderMetricName(String endPointHit, String header,
+            String headerValue) {
         String metricPrefix = traceHeadersBundle.getTraceHeadersBundleConfiguration(configuration).getMetricPrefix();
-        if(StringUtils.isBlank(metricPrefix)) {
-            header = String.format("%s-%s", header, headerValue);
+        if (StringUtils.isBlank(metricPrefix)) {
+            header = String.format("%s-%s-%s", endPointHit, header, headerValue);
         } else {
-            header = String.format("%s-%s-%s", metricPrefix, header, headerValue);
+            header = String.format("%s-%s-%s-%s", metricPrefix, endPointHit,
+                    header, headerValue);
         }
         return header;
     }
 
     public MultivaluedMap<String, String> getMultivaluedMapFromHeadersToTraceJson() {
-        if(headersAndValuesToLookUp == null) {
+        log.info("Unmarshalling traceHeaders[headersToTraceJson] into a multivalued map");
+        if (headersAndValuesToLookUp == null) {
             MultivaluedHashMap<String, String> headersAndValuesToLookUp = new MultivaluedHashMap<>();
-            JsonNode jsonNode = traceHeadersBundle.getTraceHeadersBundleConfiguration(configuration).getHeadersToTraceJsonNode();
+            JsonNode jsonNode = traceHeadersBundle.getTraceHeadersBundleConfiguration(configuration)
+                    .getHeadersToTraceJsonNode();
             jsonNode.fields().forEachRemaining(entry -> {
                 String key = entry.getKey().toLowerCase();
-                if(entry.getValue().isArray()) {
+                if (entry.getValue().isArray()) {
                     log.info("Key[" + entry.getKey() + "] has an array of values: " + entry.getValue());
                     entry.getValue().elements().forEachRemaining(jsonElement -> {
                         String value = jsonElement.asText().toLowerCase();
@@ -64,7 +68,7 @@ public class TraceHeadersBundleConfigHelper<T extends Configuration> {
 
     private void addToMap(MultivaluedHashMap<String, String> headersAndValuesToLookUp, String key, String value) {
         headersAndValuesToLookUp.add(key, value);
-        log.info("Added new header from Json [" + key + ": " + value + "]");
+        log.info("Added new header from headersToTraceJson property Json [" + key + ": " + value + "]");
     }
 
 }

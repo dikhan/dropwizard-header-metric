@@ -27,6 +27,8 @@ public class HeaderMetricFilterTest {
     @Mock
     private ContainerRequestContext requestContext;
 
+    private static final String END_POINT_HIT = "EndPointHit";
+
     private static final String REQUEST_HEADER_1 = "request_header_1";
     private static final String REQUEST_HEADER_1_VALUE = "request_header_1_value_1";
     private Counter counterHeader1 = new Counter();
@@ -35,7 +37,6 @@ public class HeaderMetricFilterTest {
     private static final String REQUEST_HEADER_2 = "request_header_2";
     private static final String REQUEST_HEADER_2_VALUE = "request_header_2_value";
     private Counter counterHeader2 = new Counter();
-
 
     @Before
     public void setUp() {
@@ -56,7 +57,8 @@ public class HeaderMetricFilterTest {
 
     @Test
     public void testFilterWithMultipleHeadersToTrack() throws IOException {
-        String headersToTraceJson = String.format("{\"%s\": \"%s\", \"%s\": \"%s\"}", REQUEST_HEADER_1, REQUEST_HEADER_1_VALUE, REQUEST_HEADER_2, REQUEST_HEADER_2_VALUE);
+        String headersToTraceJson = String.format("{\"%s\": \"%s\", \"%s\": \"%s\"}", REQUEST_HEADER_1,
+                REQUEST_HEADER_1_VALUE, REQUEST_HEADER_2, REQUEST_HEADER_2_VALUE);
         callFilter(headersToTraceJson, metricRegistry);
 
         ArgumentCaptor<String> metricCaptor = captureHeaderMetricCalls(2);
@@ -82,10 +84,11 @@ public class HeaderMetricFilterTest {
         verifyZeroInteractions(metricRegistry);
     }
 
-    private void callFilter(String headersToTraceJson, MetricRegistry metricRegistry)
-            throws IOException {
-        TraceHeadersBundleConfigHelper traceHeadersBundleConfigHelper = setUpTraceHeadersBundleConfigHelper(headersToTraceJson, metricRegistry);
-        HeaderMetricFilter headerMetricFilter = new HeaderMetricFilter(traceHeadersBundleConfigHelper, metricRegistry);
+    private void callFilter(String headersToTraceJson, MetricRegistry metricRegistry) throws IOException {
+        TraceHeadersBundleConfigHelper traceHeadersBundleConfigHelper = setUpTraceHeadersBundleConfigHelper(
+                headersToTraceJson, metricRegistry);
+        HeaderMetricFilter headerMetricFilter = new HeaderMetricFilter(END_POINT_HIT,
+                traceHeadersBundleConfigHelper, metricRegistry);
         headerMetricFilter.filter(requestContext);
     }
 
@@ -97,17 +100,17 @@ public class HeaderMetricFilterTest {
 
     private void verifyThatGivenHeaderHasBeenTracked(ArgumentCaptor<String> metricCaptor, String header,
             String headerValue, Counter headerCounter) {
-        assertThat(metricCaptor.getAllValues()).contains(HEADER_METRIC_PREFIX + "-" + header + "-" + headerValue);
+        assertThat(metricCaptor.getAllValues()).contains(HEADER_METRIC_PREFIX + "-" + END_POINT_HIT + "-" + header + "-" + headerValue);
         assertThat(headerCounter.getCount()).isEqualTo(1);
     }
 
     private void initMetricRegistry() {
-        when(metricRegistry.counter(HEADER_METRIC_PREFIX + "-" + REQUEST_HEADER_1 + "-" + REQUEST_HEADER_1_VALUE)).thenReturn(
-                counterHeader1);
-        when(metricRegistry.counter(HEADER_METRIC_PREFIX + "-" + REQUEST_HEADER_1 + "-" + REQUEST_HEADER_1_VALUE_2)).thenReturn(
-                counterHeader3);
-        when(metricRegistry.counter(HEADER_METRIC_PREFIX + "-" + REQUEST_HEADER_2 + "-" + REQUEST_HEADER_2_VALUE)).thenReturn(
-                counterHeader2);
+        when(metricRegistry.counter(HEADER_METRIC_PREFIX + "-" + END_POINT_HIT + "-" + REQUEST_HEADER_1 + "-" + REQUEST_HEADER_1_VALUE))
+                .thenReturn(counterHeader1);
+        when(metricRegistry.counter(HEADER_METRIC_PREFIX + "-"+ END_POINT_HIT + "-" + REQUEST_HEADER_1 + "-" + REQUEST_HEADER_1_VALUE_2))
+                .thenReturn(counterHeader3);
+        when(metricRegistry.counter(HEADER_METRIC_PREFIX + "-"+ END_POINT_HIT + "-" + REQUEST_HEADER_2 + "-" + REQUEST_HEADER_2_VALUE))
+                .thenReturn(counterHeader2);
     }
 
     private void initRequestHeaders() {

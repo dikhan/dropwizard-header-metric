@@ -4,13 +4,12 @@ import java.io.IOException;
 
 import javax.validation.Valid;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import org.hibernate.validator.constraints.NotEmpty;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * This class collects all the configuration needed to set up the {@link TraceHeadersBundle} class
