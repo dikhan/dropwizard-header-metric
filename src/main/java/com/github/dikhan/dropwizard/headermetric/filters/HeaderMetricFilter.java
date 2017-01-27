@@ -27,12 +27,13 @@ public class HeaderMetricFilter implements ContainerRequestFilter {
     public void filter(ContainerRequestContext requestContext) throws IOException {
         MultivaluedMap<String, String> headersAndValuesToLookUp = traceHeadersBundleConfigHelper.getMultivaluedMapFromHeadersToTraceJson();
         final MultivaluedMap<String, String> requestContextHeaders = requestContext.getHeaders();
-        for(Map.Entry<String, List<String>> headerToLookUp: headersAndValuesToLookUp.entrySet()) {
+
+        headersAndValuesToLookUp.entrySet().forEach(headerToLookUp -> {
             String searchedHeader = headerToLookUp.getKey();
             List<String> matchedKeyValues = requestContextHeaders.get(searchedHeader);
             if(matchedKeyValues != null) {
                 List<String> headerToLookUpValues = headerToLookUp.getValue();
-                for(String searchedValue: headerToLookUpValues) {
+                headerToLookUpValues.forEach(searchedValue -> {
                     // When a request contains multiple values for a given header, the multivalued map does not
                     // include multiple indexes for the different values; rather the values are all stored in the first
                     // index concatenated. E,g: x-custom-header-value-1,x-custom-header-value-2. Hence the need to
@@ -44,8 +45,8 @@ public class HeaderMetricFilter implements ContainerRequestFilter {
                         Counter counter = metricRegistry.counter(metricName);
                         counter.inc();
                     }
-                }
+                });
             }
-        }
+        });
     }
 }

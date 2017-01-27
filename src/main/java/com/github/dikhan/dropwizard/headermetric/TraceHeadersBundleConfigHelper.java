@@ -1,10 +1,5 @@
 package com.github.dikhan.dropwizard.headermetric;
 
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Consumer;
-
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
@@ -72,20 +67,4 @@ public class TraceHeadersBundleConfigHelper<T extends Configuration> {
         log.info("Added new header from Json [" + key + ": " + value + "]");
     }
 
-    /**
-     * This method is necessary to avoid potential issues whereby the user configures the headers to look up in
-     * upper case and the headers coming from the request are lower case
-     * @param headersAndValues map containing the headers and values to be tracked
-     * @return multivalued map containing headers and values in lower case
-     */
-    private MultivaluedMap<String, String> lowerCaseHeadersAndValuesToLookUp(MultivaluedMap<String, String> headersAndValues) {
-        MultivaluedHashMap<String, String> headersAndValuesToLookUp = new MultivaluedHashMap<>();
-        for(Map.Entry<String, List<String>> headerToRegister: headersAndValues.entrySet()) {
-            String headerKeyToLookUp = headerToRegister.getKey().toLowerCase();
-            for(String headerKeyValueToLookUp : headerToRegister.getValue()) {
-                headersAndValuesToLookUp.add(headerKeyToLookUp, headerKeyValueToLookUp.toLowerCase());
-            }
-        }
-        return headersAndValuesToLookUp;
-    }
 }
