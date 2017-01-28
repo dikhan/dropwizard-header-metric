@@ -19,17 +19,17 @@ and start tracking all the headers you wish!
 
 ## How to use it
 
-- Add the Maven dependency (available in Maven Central)
+- Include the following dependency in the the Maven pom file (check out the versions available in Maven Central)
 
 ```
 <dependency>
     <groupId>com.github.dikhan</groupId>
     <artifactId>dropwizard-header-metric</artifactId>
-    <version>1.1</version>
+    <version>${dropwizard-header-metric.version}</version>
 </dependency>
 ```
 
-- Add the @TraceConfiguredHeaders annotation to the end points you would like to trace the expected headers:
+- Add the @TraceConfiguredHeaders annotation (providing a value to the property 'name') to the end points you would like to trace the expected headers:
 
 ```
     @GET
@@ -40,9 +40,9 @@ and start tracking all the headers you wish!
 ```
 
 The annotation supports the configuration of a name. This value will be used to register the metrics and be able to
-identify what exact endpoint got the expected headers.
+identify what exact endpoint which received the expected headers.
 
-- Add the following to your Configuration class:
+- Add the following to your DropWizard Configuration class:
 
 ```
 public class YourApplicationConfiguration extends Configuration {
@@ -61,13 +61,13 @@ public class YourApplicationConfiguration extends Configuration {
 
 ```
 
-- Add the following your configuration yml:
+- Update DropWizard's application yml configuration file:
 
-Both properties (headersToTraceJson and metricPrefix)are optional and can be left empty, though the empty String "" needs 
+Both properties (headersToTraceJson and metricPrefix) are optional and can be left empty, though the empty String "" needs 
 to be set.
-The headersToTraceJson property value has to be properly formatter as Json object and the double quotes need to be escaped. 
+The headersToTraceJson property value has to be properly formatted as Json object and the double quotes need to be escaped. 
 The following structures are supported:
-0. Empty Json object: No headers will be tracked in this case
+0. Empty Json object: {} No headers will be tracked in this case
 1. Single key value: {"y-custom-header": "y-custom-header-value1"}
 2. Key with multiple values: {"x-custom-header": ["x-custom-header-value1", "x-custom-header-value2"]}
 
@@ -76,7 +76,6 @@ traceHeaders:
   headersToTraceJson: "{\"x-custom-header\": [\"x-custom-header-value1\", \"x-custom-header-value2\"], \"y-custom-header\": \"y-custom-header-value1\"}"    
   metricPrefix: HeaderMetricPrefix
 ```
-
 
 - In your Application class:
 
@@ -92,10 +91,6 @@ traceHeaders:
         });
     }
 ```
-
-Please note that the method getHeadersToMeasure() is an example and can be replaced with custom implementation. 
-For instance, headersToMeasure map could be injected using a DI framework and passed in directly to the TraceHeadersBundle
-when constructing the object.
 
 ## Contributing
 
