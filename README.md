@@ -1,5 +1,7 @@
 # DropWizard Header Metrics [![Build Status][travis-image]][travis-url]
 
+![][dropwizard-header-metric-logo]
+
 Would you like to track down certain headers from the consumers of your service or even know who is calling your service 
 and be able to report the usage to many different external services via [DropWizard supported reporters](http://metrics.dropwizard.io/3.1.0/manual/core/#reporters) 
 such as console, csv, slf4j, graphite, ganglia, etc? If the answer is YES, then you are in the right place :)
@@ -155,6 +157,9 @@ participated in this project.
 ## Acknowledgements:
 
 - DropWizard: https://github.com/dropwizard
+
+
+[dropwizard-header-metric-logo]: https://github.com/dikhan/dropwizard-header-metric/blob/master/docs/images/dropwizard-header-metric.png
 
 [license-url]: https://github.com/dikhan/dropwizard-header-metric/blob/master/LICENSE
 [license-image]: https://img.shields.io/badge/license-MIT-blue.svg?style=flat
