@@ -117,8 +117,6 @@ The sample application is also configured to use the 'console' reporter, so we a
 HeaderMetric-sayHelloWorld-x-custom-header-x-custom-header-value1 count = 0
 HeaderMetric-sayHelloWorld-x-custom-header-x-custom-header-value2 count = 0
 HeaderMetric-sayHelloWorld-y-custom-header-y-custom-header-value1 count = 0
-io.dropwizard.jetty.MutableServletContextHandler.active-dispatches count = 0
-io.dropwizard.jetty.MutableServletContextHandler.active-requests count = 0
 ```
 
 If we were to perform a GET request to the end point annotated with @TraceConfiguredHeaders(name="sayHelloWorld") passing in for instance the header x-custom-header with value x-custom-header-value1. Then we should expect the counter of the given endpoint/header to be incresed by one.
