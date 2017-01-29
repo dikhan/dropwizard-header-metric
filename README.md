@@ -29,6 +29,8 @@ and start tracking all the headers you wish!
 </dependency>
 ```
 
+All versions available in Maven Central can be seen at [Maven Repo1](https://repo1.maven.org/maven2/com/github/dikhan/dropwizard-header-metric/)
+
 - Add the @TraceConfiguredHeaders annotation (providing a value to the property 'name') to the end points you would like to trace the expected headers:
 
 ```
