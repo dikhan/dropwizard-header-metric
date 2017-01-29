@@ -42,8 +42,7 @@ public class HeaderMetricFeature implements DynamicFeature {
 
     private void registerHeaderMetrics(String endPointHit,
             TraceHeadersBundleConfigHelper traceHeadersBundleConfigHelper, MetricRegistry metricRegistry) {
-        MultivaluedMap<String, String> headersAndValuesToLookUp = traceHeadersBundleConfigHelper
-                .getMultivaluedMapFromHeadersToTraceJson();
+        MultivaluedMap<String, String> headersAndValuesToLookUp = traceHeadersBundleConfigHelper.getHeadersAndValuesToLookUp();
         headersAndValuesToLookUp.entrySet().forEach(
                 headerToRegister -> {
                     for (String headerValue : headerToRegister.getValue()) {

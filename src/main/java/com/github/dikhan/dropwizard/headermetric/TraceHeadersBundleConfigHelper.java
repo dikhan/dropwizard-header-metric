@@ -23,46 +23,46 @@ public class TraceHeadersBundleConfigHelper<T extends Configuration> {
 
     private final T configuration;
     private final TraceHeadersBundle traceHeadersBundle;
-    private MultivaluedHashMap<String, String> headersAndValuesToLookUp;
+    private final MultivaluedMap headersAndValuesToLookUp;
 
     public TraceHeadersBundleConfigHelper(T configuration, TraceHeadersBundle traceHeadersBundle) {
         this.configuration = configuration;
         this.traceHeadersBundle = traceHeadersBundle;
+        this.headersAndValuesToLookUp = createMultivaluedMapFromHeadersToTraceJson();
     }
 
-    public String getHeaderMetricName(String endPointHit, String header,
-            String headerValue) {
+    public String getHeaderMetricName(String endPointHit, String header, String headerValue) {
         String metricPrefix = traceHeadersBundle.getTraceHeadersBundleConfiguration(configuration).getMetricPrefix();
         if (StringUtils.isBlank(metricPrefix)) {
             header = String.format("%s-%s-%s", endPointHit, header, headerValue);
         } else {
-            header = String.format("%s-%s-%s-%s", metricPrefix, endPointHit,
-                    header, headerValue);
+            header = String.format("%s-%s-%s-%s", metricPrefix, endPointHit, header, headerValue);
         }
         return header;
     }
 
-    public MultivaluedMap<String, String> getMultivaluedMapFromHeadersToTraceJson() {
+    public MultivaluedMap getHeadersAndValuesToLookUp() {
+        return headersAndValuesToLookUp;
+    }
+
+    private MultivaluedMap createMultivaluedMapFromHeadersToTraceJson() {
         log.info("Unmarshalling traceHeaders[headersToTraceJson] into a multivalued map");
-        if (headersAndValuesToLookUp == null) {
-            MultivaluedHashMap<String, String> headersAndValuesToLookUp = new MultivaluedHashMap<>();
-            JsonNode jsonNode = traceHeadersBundle.getTraceHeadersBundleConfiguration(configuration)
-                    .getHeadersToTraceJsonNode();
-            jsonNode.fields().forEachRemaining(entry -> {
-                String key = entry.getKey().toLowerCase();
-                if (entry.getValue().isArray()) {
-                    log.info("Key[" + entry.getKey() + "] has an array of values: " + entry.getValue());
-                    entry.getValue().elements().forEachRemaining(jsonElement -> {
-                        String value = jsonElement.asText().toLowerCase();
-                        addToMap(headersAndValuesToLookUp, key, value);
-                    });
-                } else {
-                    String value = entry.getValue().asText().toLowerCase();
+        MultivaluedHashMap<String, String> headersAndValuesToLookUp = new MultivaluedHashMap<>();
+        JsonNode jsonNode = traceHeadersBundle.getTraceHeadersBundleConfiguration(configuration)
+                .getHeadersToTraceJsonNode();
+        jsonNode.fields().forEachRemaining(entry -> {
+            String key = entry.getKey().toLowerCase();
+            if (entry.getValue().isArray()) {
+                log.info("Key[" + entry.getKey() + "] has an array of values: " + entry.getValue());
+                entry.getValue().elements().forEachRemaining(jsonElement -> {
+                    String value = jsonElement.asText().toLowerCase();
                     addToMap(headersAndValuesToLookUp, key, value);
-                }
-            });
-            this.headersAndValuesToLookUp = headersAndValuesToLookUp;
-        }
+                });
+            } else {
+                String value = entry.getValue().asText().toLowerCase();
+                addToMap(headersAndValuesToLookUp, key, value);
+            }
+        });
         return headersAndValuesToLookUp;
     }
 

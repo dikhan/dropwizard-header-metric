@@ -56,6 +56,16 @@ public class HeaderMetricFilterTest {
     }
 
     @Test
+    public void testFilterRequestValuesUpperCase() throws IOException {
+        String headersToTraceJson = String.format("{\"%s\": \"%s\"}", REQUEST_HEADER_1, REQUEST_HEADER_1_VALUE.toUpperCase());
+        callFilter(headersToTraceJson, metricRegistry);
+
+        ArgumentCaptor<String> metricCaptor = captureHeaderMetricCalls(1);
+        verifyThatGivenHeaderHasBeenTracked(metricCaptor, REQUEST_HEADER_1, REQUEST_HEADER_1_VALUE, counterHeader1);
+    }
+
+
+    @Test
     public void testFilterWithMultipleHeadersToTrack() throws IOException {
         String headersToTraceJson = String.format("{\"%s\": \"%s\", \"%s\": \"%s\"}", REQUEST_HEADER_1,
                 REQUEST_HEADER_1_VALUE, REQUEST_HEADER_2, REQUEST_HEADER_2_VALUE);

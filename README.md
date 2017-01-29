@@ -123,6 +123,6 @@ participated in this project.
 [travis-url]: https://travis-ci.org/dikhan/dropwizard-header-metric
 [travis-image]: https://travis-ci.org/dikhan/dropwizard-header-metric.svg?branch=master
 
-[maven-url]: http://search.maven.org/#search%7Cga%7C1%7Ccom.github.dikhan
+[maven-url]: http://search.maven.org/#search%7Cga%7C1%7Ca%3A%22dropwizard-header-metric%22
 [maven-version]: https://img.shields.io/maven-central/v/com.github.dikhan/dropwizard-header-metric.svg?style=flat
 
