@@ -98,7 +98,7 @@ traceHeaders:
 
 ## Examples
 
-The library contains a sample application already set up to work with the bundle. The application yml file is configured to trace certain headers and the HelloWorldResource @Path("/hello-world") @GET sayHelloWorld() endpoint is annotated with the custom annotation thus anytime the endpoint is called with some of the headers configured we should see the specific header counter incresed.
+The library contains a sample application already set up to work with the bundle. The application yml file is configured to trace certain headers and the HelloWorldResource @Path("/hello-world") @GET sayHelloWorld() endpoint is annotated with the custom annotation thus anytime the endpoint is called with some of the headers configured we should see the specific header counter increased.
 
 For info purposes, the applicaiton will log on start up the headers that are registered per end point. The following shows a sneak peak of the print out:
 
@@ -108,7 +108,7 @@ INFO  [2017-01-28 13:03:47,950] com.github.dikhan.dropwizard.headermetric.featur
 INFO  [2017-01-28 13:03:47,950] com.github.dikhan.dropwizard.headermetric.features.HeaderMetricFeature: New Header Metric registered -> HeaderMetric-sayHelloWorld-y-custom-header-y-custom-header-value1
 ```
 
-In the avobe you can tell that we are using a prefix (HeaderMetric) as speciied in the yml configuration, followed by the endpoint with the annotaiton and lastly the header name and the value to be traced.
+In the above you can tell that we are using a prefix (HeaderMetric) as specified in the yml configuration, followed by the endpoint with the annotaiton and lastly the header name and the value to be traced.
 
 The sample application is also configured to use the 'console' reporter, so we are able to see what metrics are reported from time to time depending upon the frequency value. Below is one of the print outs in the console:
 
@@ -135,7 +135,7 @@ HOST: localhost:<SERVER_PORT>
 x-custom-header: X-CUSTOM-HEADER-VALUE1
 ```
 
-And the logs should show:
+And the reporter in use should capture the change and in the sample app case the logs should show:
 
 ```
 -- Counters --------------------------------------------------------------------
