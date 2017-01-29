@@ -19,17 +19,17 @@ and start tracking all the headers you wish!
 
 ## How to use it
 
-- Add the Maven dependency (available in Maven Central)
+- Include the following dependency in the the Maven pom file (check out the versions available in Maven Central)
 
 ```
 <dependency>
     <groupId>com.github.dikhan</groupId>
     <artifactId>dropwizard-header-metric</artifactId>
-    <version>1.1</version>
+    <version>${dropwizard-header-metric.version}</version>
 </dependency>
 ```
 
-- Add the @TraceConfiguredHeaders annotation to the end points you would like to trace the expected headers:
+- Add the @TraceConfiguredHeaders annotation (providing a value to the property 'name') to the end points you would like to trace the expected headers:
 
 ```
     @GET
@@ -40,9 +40,9 @@ and start tracking all the headers you wish!
 ```
 
 The annotation supports the configuration of a name. This value will be used to register the metrics and be able to
-identify what exact endpoint got the expected headers.
+identify what exact endpoint which received the expected headers.
 
-- Add the following to your Configuration class:
+- Add the following to your DropWizard Configuration class:
 
 ```
 public class YourApplicationConfiguration extends Configuration {
@@ -61,13 +61,13 @@ public class YourApplicationConfiguration extends Configuration {
 
 ```
 
-- Add the following your configuration yml:
+- Update DropWizard's application yml configuration file:
 
-Both properties (headersToTraceJson and metricPrefix)are optional and can be left empty, though the empty String "" needs 
+Both properties (headersToTraceJson and metricPrefix) are optional and can be left empty, though the empty String "" needs 
 to be set.
-The headersToTraceJson property value has to be properly formatter as Json object and the double quotes need to be escaped. 
+The headersToTraceJson property value has to be properly formatted as Json object and the double quotes need to be escaped. 
 The following structures are supported:
-0. Empty Json object: No headers will be tracked in this case
+0. Empty Json object: {} No headers will be tracked in this case
 1. Single key value: {"y-custom-header": "y-custom-header-value1"}
 2. Key with multiple values: {"x-custom-header": ["x-custom-header-value1", "x-custom-header-value2"]}
 
@@ -76,7 +76,6 @@ traceHeaders:
   headersToTraceJson: "{\"x-custom-header\": [\"x-custom-header-value1\", \"x-custom-header-value2\"], \"y-custom-header\": \"y-custom-header-value1\"}"    
   metricPrefix: HeaderMetricPrefix
 ```
-
 
 - In your Application class:
 
@@ -93,9 +92,47 @@ traceHeaders:
     }
 ```
 
-Please note that the method getHeadersToMeasure() is an example and can be replaced with custom implementation. 
-For instance, headersToMeasure map could be injected using a DI framework and passed in directly to the TraceHeadersBundle
-when constructing the object.
+## Examples
+
+The library contains a sample application already set up to work with the bundle. The application yml file is configured to trace certain headers and the HelloWorldResource @Path("/hello-world") @GET sayHelloWorld() endpoint is annotated with the custom annotation thus anytime the endpoint is called with some of the headers configured we should see the specific header counter incresed.
+
+For info purposes, the applicaiton will log on start up the headers that are registered per end point. The following shows a sneak peak of the print out:
+```
+INFO  [2017-01-28 13:03:47,950] com.github.dikhan.dropwizard.headermetric.features.HeaderMetricFeature: New Header Metric registered -> HeaderMetric-sayHelloWorld-x-custom-header-x-custom-header-value1
+INFO  [2017-01-28 13:03:47,950] com.github.dikhan.dropwizard.headermetric.features.HeaderMetricFeature: New Header Metric registered -> HeaderMetric-sayHelloWorld-x-custom-header-x-custom-header-value2
+INFO  [2017-01-28 13:03:47,950] com.github.dikhan.dropwizard.headermetric.features.HeaderMetricFeature: New Header Metric registered -> HeaderMetric-sayHelloWorld-y-custom-header-y-custom-header-value1
+```
+In the avobe you can tell that we are using a prefix (HeaderMetric) as speciied in the yml configuration, followed by the endpoint with the annotaiton and lastly the header name and the value to be traced.
+
+The sample application is also configured to use the 'console' reporter, so we are able to see what metrics are reported from time to time depending upon the frequency value. Below is one of the print outs in the console:
+
+```
+-- Counters --------------------------------------------------------------------
+HeaderMetric-sayHelloWorld-x-custom-header-x-custom-header-value1
+             count = 0
+HeaderMetric-sayHelloWorld-x-custom-header-x-custom-header-value2
+             count = 0
+HeaderMetric-sayHelloWorld-y-custom-header-y-custom-header-value1
+             count = 0
+io.dropwizard.jetty.MutableServletContextHandler.active-dispatches
+             count = 0
+io.dropwizard.jetty.MutableServletContextHandler.active-requests
+             count = 0
+io.dropwizard.jetty.MutableServletContextHandler.active-suspended
+```
+If we were to perform a GET request to the end point annotated with @TraceConfiguredHeaders(name="sayHelloWorld") passing in for instance the header x-custom-header with value x-custom-header-value1. Then we should expect the counter of the given endpoint/header to be incresed by one.
+
+```
+GET /hello-world HTTP/1.1
+HOST: localhost:<SERVER_PORT>
+x-custom-header: X-CUSTOM-HEADER-VALUE1
+```
+And the logs should show:
+```
+-- Counters --------------------------------------------------------------------
+HeaderMetric-sayHelloWorld-x-custom-header-x-custom-header-value1
+             count = 1
+```
 
 ## Contributing
 
