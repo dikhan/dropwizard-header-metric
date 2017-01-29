@@ -132,6 +132,7 @@ HOST: localhost:<SERVER_PORT>
 x-custom-header: X-CUSTOM-HEADER-VALUE1
 ```
 And the logs should show:
+
 ```
 -- Counters --------------------------------------------------------------------
 HeaderMetric-sayHelloWorld-x-custom-header-x-custom-header-value1
