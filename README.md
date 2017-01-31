@@ -152,7 +152,13 @@ participated in this project.
 
 ## Acknowledgements:
 
-- DropWizard: https://github.com/dropwizard
+- [DropWizard](https://github.com/dropwizard)
+- [DropWizard Reporters](http://metrics.dropwizard.io/3.1.0/manual/core/#reporters)
+- [DropWizard examples](https://github.com/dropwizard/dropwizard/blob/master/dropwizard-example/src/main/java/com/example/helloworld/HelloWorldApplication.java)
+- [Request and Response Filters in Dropwizard](http://clearthehaze.com/2014/09/request-response-filters-dropwizard/)
+- [Filters and Interceptors](https://jersey.java.net/documentation/latest/filters-and-interceptors.html)
+
+
 
 
 [dropwizard-header-metric-logo]: https://github.com/dikhan/dropwizard-header-metric/blob/master/docs/images/dropwizard-header-metric.png
