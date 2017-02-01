@@ -98,9 +98,10 @@ traceHeaders:
 
 ## Examples
 
-The library contains a sample application already set up to work with the bundle. The application yml file is configured to trace certain headers and the HelloWorldResource @Path("/hello-world") @GET sayHelloWorld() endpoint is annotated with the custom annotation thus anytime the endpoint is called with some of the headers configured we should see the specific header counter incresed.
+The library contains a sample application already set up to work with the bundle. The application yml file is configured to trace certain headers and the HelloWorldResource @Path("/hello-world") @GET sayHelloWorld() endpoint is annotated with the custom annotation thus anytime the endpoint is called with some of the headers configured we should see the specific header counter increased.
 
 For info purposes, the applicaiton will log on start up the headers that are registered per end point. The following shows a sneak peak of the print out:
+
 ```
 INFO  [2017-02-01 11:39:35,090] com.github.dikhan.dropwizard.headermetric.features.HeaderMetricFeature: New Header Metric registered -> com.github.dikhan.dropwizard.headermetric.resources.HelloWorldResource.sayHelloWorld.HeaderMetric.x-custom-header.x-custom-header-value1
 INFO  [2017-02-01 11:39:35,090] com.github.dikhan.dropwizard.headermetric.features.HeaderMetricFeature: New Header Metric registered -> com.github.dikhan.dropwizard.headermetric.resources.HelloWorldResource.sayHelloWorld.HeaderMetric.x-custom-header.x-custom-header-value2
@@ -120,6 +121,7 @@ com.github.dikhan.dropwizard.headermetric.resources.HelloWorldResource.sayHelloW
 com.github.dikhan.dropwizard.headermetric.resources.HelloWorldResource.sayHelloWorld.HeaderMetric.x-custom-header.x-custom-header-value2 count = 0
 com.github.dikhan.dropwizard.headermetric.resources.HelloWorldResource.sayHelloWorld.HeaderMetric.y-custom-header.y-custom-header-value1 count = 0
 ```
+
 If we were to perform a GET request to the end point annotated with @TraceConfiguredHeaders(name="sayHelloWorld") passing in for instance the header x-custom-header with value x-custom-header-value1. Then we should expect the counter of the given endpoint/header to be incresed by one.
 
 ```
@@ -127,7 +129,8 @@ GET /hello-world HTTP/1.1
 HOST: localhost:<SERVER_PORT>
 x-custom-header: X-CUSTOM-HEADER-VALUE1
 ```
-And the logs should show:
+
+And the reporter in use should capture the change and in the sample app case the logs should show:
 
 ```
 -- Counters --------------------------------------------------------------------
@@ -152,7 +155,13 @@ participated in this project.
 
 ## Acknowledgements:
 
-- DropWizard: https://github.com/dropwizard
+- [DropWizard](https://github.com/dropwizard)
+- [DropWizard Reporters](http://metrics.dropwizard.io/3.1.0/manual/core/#reporters)
+- [DropWizard examples](https://github.com/dropwizard/dropwizard/blob/master/dropwizard-example/src/main/java/com/example/helloworld/HelloWorldApplication.java)
+- [Request and Response Filters in Dropwizard](http://clearthehaze.com/2014/09/request-response-filters-dropwizard/)
+- [Filters and Interceptors](https://jersey.java.net/documentation/latest/filters-and-interceptors.html)
+
+
 
 
 [dropwizard-header-metric-logo]: https://github.com/dikhan/dropwizard-header-metric/blob/master/docs/images/dropwizard-header-metric.png
