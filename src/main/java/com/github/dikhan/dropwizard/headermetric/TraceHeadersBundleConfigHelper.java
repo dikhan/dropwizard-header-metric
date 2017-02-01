@@ -31,12 +31,12 @@ public class TraceHeadersBundleConfigHelper<T extends Configuration> {
         this.headersAndValuesToLookUp = createMultivaluedMapFromHeadersToTraceJson();
     }
 
-    public String getHeaderMetricName(String endPointHit, String header, String headerValue) {
+    public String getHeaderMetricName(String resourceEndPointCanonicalName, String header, String headerValue) {
         String metricPrefix = traceHeadersBundle.getTraceHeadersBundleConfiguration(configuration).getMetricPrefix();
         if (StringUtils.isBlank(metricPrefix)) {
-            header = String.format("%s-%s-%s", endPointHit, header, headerValue);
+            header = String.format("%s.%s.%s", resourceEndPointCanonicalName, header, headerValue);
         } else {
-            header = String.format("%s-%s-%s-%s", metricPrefix, endPointHit, header, headerValue);
+            header = String.format("%s.%s.%s.%s", resourceEndPointCanonicalName, metricPrefix, header, headerValue);
         }
         return header;
     }
@@ -71,4 +71,7 @@ public class TraceHeadersBundleConfigHelper<T extends Configuration> {
         log.info("Added new header from headersToTraceJson property Json [" + key + ": " + value + "]");
     }
 
+    public String getResourceEndPointCanonicalName(String classEndPointCanonicalName, String annotationNameValue) {
+        return classEndPointCanonicalName + "." + annotationNameValue;
+    }
 }

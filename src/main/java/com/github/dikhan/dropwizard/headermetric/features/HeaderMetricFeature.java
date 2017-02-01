@@ -33,21 +33,22 @@ public class HeaderMetricFeature implements DynamicFeature {
         TraceConfiguredHeaders matchedResourceTraceConfiguredHeadersAnnotation = resourceInfo.getResourceMethod()
                 .getAnnotation(TraceConfiguredHeaders.class);
         if (matchedResourceTraceConfiguredHeadersAnnotation != null) {
-            String endPointHit = matchedResourceTraceConfiguredHeadersAnnotation.name();
-            context.register(new HeaderMetricFilter(endPointHit,
-                    traceHeadersBundleConfigHelper, metricRegistry));
+            String endPointHit = traceHeadersBundleConfigHelper.getResourceEndPointCanonicalName(resourceInfo.getResourceMethod()
+                    .getDeclaringClass().getCanonicalName(), matchedResourceTraceConfiguredHeadersAnnotation.name());
+            context.register(new HeaderMetricFilter(endPointHit, traceHeadersBundleConfigHelper, metricRegistry));
             registerHeaderMetrics(endPointHit, traceHeadersBundleConfigHelper, metricRegistry);
         }
     }
 
     private void registerHeaderMetrics(String endPointHit,
             TraceHeadersBundleConfigHelper traceHeadersBundleConfigHelper, MetricRegistry metricRegistry) {
-        MultivaluedMap<String, String> headersAndValuesToLookUp = traceHeadersBundleConfigHelper.getHeadersAndValuesToLookUp();
+        MultivaluedMap<String, String> headersAndValuesToLookUp = traceHeadersBundleConfigHelper
+                .getHeadersAndValuesToLookUp();
         headersAndValuesToLookUp.entrySet().forEach(
                 headerToRegister -> {
                     for (String headerValue : headerToRegister.getValue()) {
-                        String header = traceHeadersBundleConfigHelper.getHeaderMetricName(endPointHit, headerToRegister.getKey(),
-                                headerValue);
+                        String header = traceHeadersBundleConfigHelper.getHeaderMetricName(endPointHit,
+                                headerToRegister.getKey(), headerValue);
                         metricRegistry.register(header, new Counter());
                         log.info("New Header Metric registered -> {}", header);
                     }

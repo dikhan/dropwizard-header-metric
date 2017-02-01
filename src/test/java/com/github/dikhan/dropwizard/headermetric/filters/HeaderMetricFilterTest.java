@@ -27,7 +27,9 @@ public class HeaderMetricFilterTest {
     @Mock
     private ContainerRequestContext requestContext;
 
-    private static final String END_POINT_HIT = "EndPointHit";
+    private static final String RESOURCE_CLASS_CANONICAL_NAME = "com.github.dikhan.dropwizard.headermetric.resources.resource";
+    private static final String END_POINT = "EndPointHit";
+    private static final String RESOURCE_END_POINT_CANONICAL_NAME = RESOURCE_CLASS_CANONICAL_NAME + "." + END_POINT;
 
     private static final String REQUEST_HEADER_1 = "request_header_1";
     private static final String REQUEST_HEADER_1_VALUE = "request_header_1_value_1";
@@ -39,7 +41,7 @@ public class HeaderMetricFilterTest {
     private Counter counterHeader2 = new Counter();
 
     @Before
-    public void setUp() {
+    public void setUp() throws NoSuchMethodException {
         metricRegistry = mock(MetricRegistry.class);
         requestContext = mock(ContainerRequestContext.class);
         initMetricRegistry();
@@ -47,7 +49,7 @@ public class HeaderMetricFilterTest {
     }
 
     @Test
-    public void testFilter() throws IOException {
+    public void testFilter() throws Exception {
         String headersToTraceJson = String.format("{\"%s\": \"%s\"}", REQUEST_HEADER_1, REQUEST_HEADER_1_VALUE);
         callFilter(headersToTraceJson, metricRegistry);
 
@@ -56,17 +58,17 @@ public class HeaderMetricFilterTest {
     }
 
     @Test
-    public void testFilterRequestValuesUpperCase() throws IOException {
-        String headersToTraceJson = String.format("{\"%s\": \"%s\"}", REQUEST_HEADER_1, REQUEST_HEADER_1_VALUE.toUpperCase());
+    public void testFilterRequestValuesUpperCase() throws Exception {
+        String headersToTraceJson = String.format("{\"%s\": \"%s\"}", REQUEST_HEADER_1,
+                REQUEST_HEADER_1_VALUE.toUpperCase());
         callFilter(headersToTraceJson, metricRegistry);
 
         ArgumentCaptor<String> metricCaptor = captureHeaderMetricCalls(1);
         verifyThatGivenHeaderHasBeenTracked(metricCaptor, REQUEST_HEADER_1, REQUEST_HEADER_1_VALUE, counterHeader1);
     }
 
-
     @Test
-    public void testFilterWithMultipleHeadersToTrack() throws IOException {
+    public void testFilterWithMultipleHeadersToTrack() throws Exception {
         String headersToTraceJson = String.format("{\"%s\": \"%s\", \"%s\": \"%s\"}", REQUEST_HEADER_1,
                 REQUEST_HEADER_1_VALUE, REQUEST_HEADER_2, REQUEST_HEADER_2_VALUE);
         callFilter(headersToTraceJson, metricRegistry);
@@ -77,7 +79,7 @@ public class HeaderMetricFilterTest {
     }
 
     @Test
-    public void testFilterWithMultipleValuesPerHeaderToTrack() throws IOException {
+    public void testFilterWithMultipleValuesPerHeaderToTrack() throws Exception {
         callFilter(HEADERS_TO_TRACE_JSON, metricRegistry);
 
         ArgumentCaptor<String> metricCaptor = captureHeaderMetricCalls(3);
@@ -87,18 +89,19 @@ public class HeaderMetricFilterTest {
     }
 
     @Test
-    public void testFilterWithNonTraceableHeaders() throws IOException {
+    public void testFilterWithNonTraceableHeaders() throws IOException, NoSuchMethodException {
         // The two headers coming from the request are not measured and therefore metric registry should not be called
         String headersToTraceJson = "{}";
         callFilter(headersToTraceJson, metricRegistry);
         verifyZeroInteractions(metricRegistry);
     }
 
-    private void callFilter(String headersToTraceJson, MetricRegistry metricRegistry) throws IOException {
+    private void callFilter(String headersToTraceJson, MetricRegistry metricRegistry) throws IOException,
+            NoSuchMethodException {
         TraceHeadersBundleConfigHelper traceHeadersBundleConfigHelper = setUpTraceHeadersBundleConfigHelper(
                 headersToTraceJson, metricRegistry);
-        HeaderMetricFilter headerMetricFilter = new HeaderMetricFilter(END_POINT_HIT,
-                traceHeadersBundleConfigHelper, metricRegistry);
+        HeaderMetricFilter headerMetricFilter = new HeaderMetricFilter(endPointCanonicalName(
+                RESOURCE_CLASS_CANONICAL_NAME, END_POINT), traceHeadersBundleConfigHelper, metricRegistry);
         headerMetricFilter.filter(requestContext);
     }
 
@@ -109,18 +112,22 @@ public class HeaderMetricFilterTest {
     }
 
     private void verifyThatGivenHeaderHasBeenTracked(ArgumentCaptor<String> metricCaptor, String header,
-            String headerValue, Counter headerCounter) {
-        assertThat(metricCaptor.getAllValues()).contains(HEADER_METRIC_PREFIX + "-" + END_POINT_HIT + "-" + header + "-" + headerValue);
+            String headerValue, Counter headerCounter) throws NoSuchMethodException {
+        assertThat(metricCaptor.getAllValues()).contains(
+                getExpectedMetric(RESOURCE_END_POINT_CANONICAL_NAME, header, headerValue));
         assertThat(headerCounter.getCount()).isEqualTo(1);
     }
 
-    private void initMetricRegistry() {
-        when(metricRegistry.counter(HEADER_METRIC_PREFIX + "-" + END_POINT_HIT + "-" + REQUEST_HEADER_1 + "-" + REQUEST_HEADER_1_VALUE))
-                .thenReturn(counterHeader1);
-        when(metricRegistry.counter(HEADER_METRIC_PREFIX + "-"+ END_POINT_HIT + "-" + REQUEST_HEADER_1 + "-" + REQUEST_HEADER_1_VALUE_2))
-                .thenReturn(counterHeader3);
-        when(metricRegistry.counter(HEADER_METRIC_PREFIX + "-"+ END_POINT_HIT + "-" + REQUEST_HEADER_2 + "-" + REQUEST_HEADER_2_VALUE))
-                .thenReturn(counterHeader2);
+    private void initMetricRegistry() throws NoSuchMethodException {
+        String expectedMetricHeader1Value1 = getExpectedMetric(RESOURCE_END_POINT_CANONICAL_NAME, REQUEST_HEADER_1,
+                REQUEST_HEADER_1_VALUE);
+        String expectedMetricHeader1Value2 = getExpectedMetric(RESOURCE_END_POINT_CANONICAL_NAME, REQUEST_HEADER_1,
+                REQUEST_HEADER_1_VALUE_2);
+        String expectedMetricHeader2Value = getExpectedMetric(RESOURCE_END_POINT_CANONICAL_NAME, REQUEST_HEADER_2,
+                REQUEST_HEADER_2_VALUE);
+        when(metricRegistry.counter(expectedMetricHeader1Value1)).thenReturn(counterHeader1);
+        when(metricRegistry.counter(expectedMetricHeader1Value2)).thenReturn(counterHeader3);
+        when(metricRegistry.counter(expectedMetricHeader2Value)).thenReturn(counterHeader2);
     }
 
     private void initRequestHeaders() {

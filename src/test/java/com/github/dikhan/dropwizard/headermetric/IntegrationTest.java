@@ -1,22 +1,25 @@
 package com.github.dikhan.dropwizard.headermetric;
 
-import static com.github.dikhan.dropwizard.headermetric.utils.TestHelper.HEADER_METRIC_PREFIX;
+import static com.github.dikhan.dropwizard.headermetric.utils.TestHelper.*;
 import static org.assertj.core.api.Assertions.*;
+
+import java.lang.reflect.Method;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Response;
 
-import com.codahale.metrics.Counter;
-import com.github.dikhan.dropwizard.headermetric.annotations.TraceConfiguredHeaders;
-import com.github.dikhan.dropwizard.headermetric.resources.TestResource;
+import com.github.dikhan.dropwizard.headermetric.resources.HelloWorldResource;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.ClassRule;
 import org.junit.Test;
 
+import com.codahale.metrics.Counter;
 import com.github.dikhan.dropwizard.TraceHeadersApplication;
 import com.github.dikhan.dropwizard.TraceHeadersApplicationConfiguration;
+import com.github.dikhan.dropwizard.headermetric.resources.TestResource;
+import com.github.dikhan.dropwizard.headermetric.utils.TestHelper;
 
 import io.dropwizard.testing.ResourceHelpers;
 import io.dropwizard.testing.junit.DropwizardAppRule;
@@ -30,6 +33,8 @@ public class IntegrationTest {
     private static final String Y_HEADER = "y-custom-header";
     private static final String Y_HEADER_VALUE = "y-custom-header-value-1";
 
+    private String endPointCanonicalName;
+
     @ClassRule
     public static final DropwizardAppRule<TraceHeadersApplicationConfiguration> RULE = new DropwizardAppRule<>(
             TraceHeadersApplication.class, CONFIG_PATH);
@@ -40,6 +45,9 @@ public class IntegrationTest {
     public void setUp() throws Exception {
         client = ClientBuilder.newClient();
         resetMetrics();
+
+        Method endPointHit = HelloWorldResource.class.getDeclaredMethod("sayHelloWorld", null);
+        endPointCanonicalName = TestHelper.endPointCanonicalName(HelloWorldResource.class, endPointHit.getName());
     }
 
     private void resetMetrics() {
@@ -119,19 +127,13 @@ public class IntegrationTest {
     }
 
     private void checkMeasuredHeaderCounter(String header, String headerValue, int count) throws NoSuchMethodException {
-        String expectedMetric = getExpectedMetric(header, headerValue);
+        String expectedMetric = getExpectedMetric(endPointCanonicalName, header, headerValue);
         assertThat(RULE.getEnvironment().metrics().getCounters().get(expectedMetric).getCount()).isEqualTo(count);
     }
 
     private void checkNonMeasuredHeaderCounter(String header, String headerValue) throws NoSuchMethodException {
-        String expectedMetric = getExpectedMetric(header, headerValue);
+        String expectedMetric = getExpectedMetric(endPointCanonicalName, header, headerValue);
         assertThat(RULE.getEnvironment().metrics().getCounters().get(expectedMetric)).isNull();
-    }
-
-    private String getExpectedMetric(String header, String headerValue) throws NoSuchMethodException {
-        String endPointHit = TestResource.class.getDeclaredMethod("sayHelloWorld", null)
-                .getAnnotation(TraceConfiguredHeaders.class).name();
-        return String.format("%s-%s-%s-%s", HEADER_METRIC_PREFIX, endPointHit, header, headerValue);
     }
 
 }

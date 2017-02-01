@@ -1,10 +1,13 @@
 package com.github.dikhan.dropwizard.headermetric.utils;
 
+import java.lang.reflect.Method;
+
 import com.codahale.metrics.MetricRegistry;
 import com.github.dikhan.dropwizard.TraceHeadersApplicationConfiguration;
 import com.github.dikhan.dropwizard.headermetric.TraceHeadersBundle;
 import com.github.dikhan.dropwizard.headermetric.TraceHeadersBundleConfigHelper;
 import com.github.dikhan.dropwizard.headermetric.TraceHeadersBundleConfiguration;
+import com.github.dikhan.dropwizard.headermetric.annotations.TraceConfiguredHeaders;
 
 /**
  * @author Daniel I. Khan Ramiro
@@ -36,5 +39,21 @@ public class TestHelper {
         TraceHeadersApplicationConfiguration traceHeadersApplicationConfiguration = setUpTraceHeadersApplicationConfiguration(HEADER_METRIC_PREFIX, headersToTraceJson);
         TraceHeadersBundle traceHeadersBundle = setUpTraceHeadersBundle(metricRegistry);
         return new TraceHeadersBundleConfigHelper<>(traceHeadersApplicationConfiguration, traceHeadersBundle);
+    }
+
+    public static String getExpectedMetric(String resourceEndPointCanonicalName, String header, String headerValue) throws NoSuchMethodException {
+        return String.format("%s.%s.%s.%s", resourceEndPointCanonicalName, HEADER_METRIC_PREFIX, header, headerValue);
+    }
+
+    public static String endPointCanonicalName(Class resourceClass, String declaredMethodWithTraceHeadersAnnotation)
+            throws NoSuchMethodException {
+        Method annotatedResourceEndPoint = resourceClass.getDeclaredMethod(declaredMethodWithTraceHeadersAnnotation, null);
+        String resourceEndPointAnnotationName = annotatedResourceEndPoint.getDeclaredAnnotation(TraceConfiguredHeaders.class).name();
+        return endPointCanonicalName(resourceClass.getCanonicalName(), resourceEndPointAnnotationName);
+    }
+
+    public static String endPointCanonicalName(String resourceClassCanonicalName, String resourceEndPointAnnotationName)
+            throws NoSuchMethodException {
+        return String.format("%s.%s", resourceClassCanonicalName, resourceEndPointAnnotationName);
     }
 }

@@ -102,27 +102,23 @@ The library contains a sample application already set up to work with the bundle
 
 For info purposes, the applicaiton will log on start up the headers that are registered per end point. The following shows a sneak peak of the print out:
 ```
-INFO  [2017-01-28 13:03:47,950] com.github.dikhan.dropwizard.headermetric.features.HeaderMetricFeature: New Header Metric registered -> HeaderMetric-sayHelloWorld-x-custom-header-x-custom-header-value1
-INFO  [2017-01-28 13:03:47,950] com.github.dikhan.dropwizard.headermetric.features.HeaderMetricFeature: New Header Metric registered -> HeaderMetric-sayHelloWorld-x-custom-header-x-custom-header-value2
-INFO  [2017-01-28 13:03:47,950] com.github.dikhan.dropwizard.headermetric.features.HeaderMetricFeature: New Header Metric registered -> HeaderMetric-sayHelloWorld-y-custom-header-y-custom-header-value1
+INFO  [2017-02-01 11:39:35,090] com.github.dikhan.dropwizard.headermetric.features.HeaderMetricFeature: New Header Metric registered -> com.github.dikhan.dropwizard.headermetric.resources.HelloWorldResource.sayHelloWorld.HeaderMetric.x-custom-header.x-custom-header-value1
+INFO  [2017-02-01 11:39:35,090] com.github.dikhan.dropwizard.headermetric.features.HeaderMetricFeature: New Header Metric registered -> com.github.dikhan.dropwizard.headermetric.resources.HelloWorldResource.sayHelloWorld.HeaderMetric.x-custom-header.x-custom-header-value2
+INFO  [2017-02-01 11:39:35,090] com.github.dikhan.dropwizard.headermetric.features.HeaderMetricFeature: New Header Metric registered -> com.github.dikhan.dropwizard.headermetric.resources.HelloWorldResource.sayHelloWorld.HeaderMetric.y-custom-header.y-custom-header-value1
 ```
-In the avobe you can tell that we are using a prefix (HeaderMetric) as speciied in the yml configuration, followed by the endpoint with the annotaiton and lastly the header name and the value to be traced.
+
+The structure of the composed metric name is as follows:
+package-name.resource-class.end-point-with-annotation.[prefix].header-name.header-value
+
+The prefix is optional and can be specified in the yml file.
 
 The sample application is also configured to use the 'console' reporter, so we are able to see what metrics are reported from time to time depending upon the frequency value. Below is one of the print outs in the console:
 
 ```
 -- Counters --------------------------------------------------------------------
-HeaderMetric-sayHelloWorld-x-custom-header-x-custom-header-value1
-             count = 0
-HeaderMetric-sayHelloWorld-x-custom-header-x-custom-header-value2
-             count = 0
-HeaderMetric-sayHelloWorld-y-custom-header-y-custom-header-value1
-             count = 0
-io.dropwizard.jetty.MutableServletContextHandler.active-dispatches
-             count = 0
-io.dropwizard.jetty.MutableServletContextHandler.active-requests
-             count = 0
-io.dropwizard.jetty.MutableServletContextHandler.active-suspended
+com.github.dikhan.dropwizard.headermetric.resources.HelloWorldResource.sayHelloWorld.HeaderMetric.x-custom-header.x-custom-header-value1 count = 0
+com.github.dikhan.dropwizard.headermetric.resources.HelloWorldResource.sayHelloWorld.HeaderMetric.x-custom-header.x-custom-header-value2 count = 0
+com.github.dikhan.dropwizard.headermetric.resources.HelloWorldResource.sayHelloWorld.HeaderMetric.y-custom-header.y-custom-header-value1 count = 0
 ```
 If we were to perform a GET request to the end point annotated with @TraceConfiguredHeaders(name="sayHelloWorld") passing in for instance the header x-custom-header with value x-custom-header-value1. Then we should expect the counter of the given endpoint/header to be incresed by one.
 
@@ -135,8 +131,7 @@ And the logs should show:
 
 ```
 -- Counters --------------------------------------------------------------------
-HeaderMetric-sayHelloWorld-x-custom-header-x-custom-header-value1
-             count = 1
+com.github.dikhan.dropwizard.headermetric.resources.HelloWorldResource.sayHelloWorld.HeaderMetric.x-custom-header.x-custom-header-value1 count = 1
 ```
 
 ## Contributing

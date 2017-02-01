@@ -17,8 +17,8 @@ import org.mockito.Mock;
 import com.codahale.metrics.Counter;
 import com.codahale.metrics.MetricRegistry;
 import com.github.dikhan.dropwizard.headermetric.TraceHeadersBundleConfigHelper;
-import com.github.dikhan.dropwizard.headermetric.annotations.TraceConfiguredHeaders;
 import com.github.dikhan.dropwizard.headermetric.resources.TestResource;
+import com.github.dikhan.dropwizard.headermetric.utils.TestHelper;
 
 public class HeaderMetricFeatureTest {
 
@@ -31,8 +31,8 @@ public class HeaderMetricFeatureTest {
     @Mock
     private MetricRegistry metricRegistry;
 
-    private Method traceConfiguredHeadersAnnotatedResourceEndPoint;
-    private String resourceEndPointAnnotationName;
+    private Method annotatedResourceEndPoint;
+    private String resourceEndPointCanonicalName;
 
     private static final String REQUEST_HEADER_1 = "request_header_1";
     private static final String REQUEST_HEADER_1_VALUE = "request_header_1_value_1";
@@ -40,14 +40,14 @@ public class HeaderMetricFeatureTest {
     private static final String REQUEST_HEADER_2 = "request_header_2";
     private static final String REQUEST_HEADER_2_VALUE = "request_header_2_value";
 
-    private static final String HEADERS_TO_TRACE_JSON = String
-            .format("{\"%s\": [\"%s\", \"%s\"], \"%s\": \"%s\"}", REQUEST_HEADER_1, REQUEST_HEADER_1_VALUE,
-                    REQUEST_HEADER_1_VALUE_2, REQUEST_HEADER_2, REQUEST_HEADER_2_VALUE);
+    private static final String HEADERS_TO_TRACE_JSON = String.format("{\"%s\": [\"%s\", \"%s\"], \"%s\": \"%s\"}",
+            REQUEST_HEADER_1, REQUEST_HEADER_1_VALUE, REQUEST_HEADER_1_VALUE_2, REQUEST_HEADER_2,
+            REQUEST_HEADER_2_VALUE);
 
     @Before
     public void setUp() throws Exception {
-        traceConfiguredHeadersAnnotatedResourceEndPoint = TestResource.class.getDeclaredMethod("sayHelloWorld", null);
-        resourceEndPointAnnotationName = traceConfiguredHeadersAnnotatedResourceEndPoint.getDeclaredAnnotation(TraceConfiguredHeaders.class).name();
+        annotatedResourceEndPoint = TestResource.class.getDeclaredMethod("sayHelloWorld", null);
+        resourceEndPointCanonicalName = endPointCanonicalName(TestResource.class, annotatedResourceEndPoint.getName());
         setUpMocks();
     }
 
@@ -107,23 +107,25 @@ public class HeaderMetricFeatureTest {
         HeaderMetricFeature headerMetricFeature = new HeaderMetricFeature(traceHeadersBundleConfigHelper,
                 metricRegistry);
 
-        Method nonTraceConfiguredHeadersAnnotatedResourceEndPoint = TestResource.class.getDeclaredMethod("sayHelloTo", String.class);
+        Method nonTraceConfiguredHeadersAnnotatedResourceEndPoint = TestResource.class.getDeclaredMethod("sayHelloTo",
+                String.class);
         when(resourceInfo.getResourceMethod()).thenReturn(nonTraceConfiguredHeadersAnnotatedResourceEndPoint);
 
         headerMetricFeature.configure(resourceInfo, featureContext);
         metricFilterIsNotRegistered();
     }
 
-    private void verifyHeaderCounterIsRegistered(ArgumentCaptor<String> metricCaptor, String header, String headerValue) {
-        assertThat(metricCaptor.getAllValues())
-                .contains(HEADER_METRIC_PREFIX + "-" + resourceEndPointAnnotationName + "-" + header + "-" + headerValue);
+    private void verifyHeaderCounterIsRegistered(ArgumentCaptor<String> metricCaptor, String header, String headerValue)
+            throws NoSuchMethodException {
+        assertThat(metricCaptor.getAllValues()).contains(
+                TestHelper.getExpectedMetric(resourceEndPointCanonicalName, header, headerValue));
     }
 
     private void setUpMocks() throws NoSuchMethodException {
         resourceInfo = mock(ResourceInfo.class);
         featureContext = mock(FeatureContext.class);
         metricRegistry = mock(MetricRegistry.class);
-        when(resourceInfo.getResourceMethod()).thenReturn(traceConfiguredHeadersAnnotatedResourceEndPoint);
+        when(resourceInfo.getResourceMethod()).thenReturn(annotatedResourceEndPoint);
     }
 
     private void captureHeaderMetricFilterRegistration() {
@@ -146,4 +148,5 @@ public class HeaderMetricFeatureTest {
         verify(metricRegistry, times(numExpectedMetricsCalls)).register(metricCaptor.capture(), any(Counter.class));
         return metricCaptor;
     }
+
 }
